@@ -362,11 +362,17 @@ export class ParticleEngine {
     const sizeArray = sizeAttribute.array as Float32Array
     for (let index = 0; index < this.particleCount; index += 1) {
       const offset = index * 3
-      const palettePosition = (index % 197) / 196
-      const scaled = palettePosition * (colors.length - 1)
-      const startIndex = Math.floor(scaled)
-      const endIndex = Math.min(colors.length - 1, startIndex + 1)
-      mixed.copy(colors[startIndex]).lerp(colors[endIndex], scaled - startIndex)
+      if (this.currentCommand.effect === 'FALCON') {
+        const region = index / this.particleCount
+        const colorIndex = region < 0.67 ? 0 : region < 0.82 ? 2 : 1
+        mixed.copy(colors[colorIndex] ?? colors[0])
+      } else {
+        const palettePosition = (index % 197) / 196
+        const scaled = palettePosition * (colors.length - 1)
+        const startIndex = Math.floor(scaled)
+        const endIndex = Math.min(colors.length - 1, startIndex + 1)
+        mixed.copy(colors[startIndex]).lerp(colors[endIndex], scaled - startIndex)
+      }
       colorArray[offset] = mixed.r
       colorArray[offset + 1] = mixed.g
       colorArray[offset + 2] = mixed.b

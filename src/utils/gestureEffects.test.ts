@@ -9,7 +9,7 @@ describe('gesture effect mapping', () => {
     expect(getGestureFormation('INDEX_POINT')).toBe('VORTEX')
     expect(getGestureFormation('PEACE')).toBe('WAVE')
     expect(getGestureFormation('PINCH')).toBe('IMPLOSION')
-    expect(getGestureFormation('UNKNOWN')).toBe('FALCON')
+    expect(getGestureFormation('UNKNOWN')).toBe('SPHERE')
   })
 
   it('keeps the underlying candidate visible during a transient snap', () => {

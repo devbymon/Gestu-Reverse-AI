@@ -8,7 +8,7 @@ const GESTURE_EFFECTS: Record<Exclude<GestureType, 'SNAP'>, FormationType> = {
   PEACE: 'WAVE',
   PINCH: 'IMPLOSION',
   TWO_HAND_EXPANSION: 'ENERGY_BURST',
-  UNKNOWN: 'FALCON',
+  UNKNOWN: 'SPHERE',
 }
 
 export function getGestureFormation(gesture: GestureType, fallback: GestureType = 'UNKNOWN'): FormationType {

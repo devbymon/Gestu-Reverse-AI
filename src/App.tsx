@@ -15,11 +15,16 @@ import { useParticleEffects } from './hooks/useParticleEffects'
 import { usePresentationMode } from './hooks/usePresentationMode'
 import type { HandTrackingState } from './types/handTracking'
 import type { ParticlePerformance } from './types/particles'
+import type { ParticleEffectCommand } from './types/particleEffects'
 import { getGestureFormation } from './utils/gestureEffects'
 import './App.css'
 
 const INITIAL_TRACKING_STATE: HandTrackingState = {
   status: 'off', modelStatus: 'idle', backend: null, handCount: 0, handedness: [], error: null,
+}
+
+const CAMERA_PREVIEW_EFFECT: ParticleEffectCommand = {
+  effect: 'FALCON', source: 'GESTURE', intensity: 0.35, triggerId: 0, timestamp: -1,
 }
 
 function App() {
@@ -32,10 +37,15 @@ function App() {
   const gestureRecognition = useGestureRecognition()
   const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
   const particleEffects = useParticleEffects(commandRef)
-  const activeEffect = getGestureFormation(gestureState.gesture, gestureState.candidate)
   const { settings, visibility, getSettings, updateSettings, setVisible, dismissWelcome } = dashboard
   const { presentationMode, requestFullscreen, enterPresentation, exitPresentation } = presentation
   const { getEffectCommand } = particleEffects
+  const activeEffect = visibility.welcome
+    ? 'FALCON'
+    : getGestureFormation(gestureState.gesture, gestureState.candidate)
+  const getSceneEffectCommand = useCallback(() => (
+    visibility.welcome ? CAMERA_PREVIEW_EFFECT : getEffectCommand()
+  ), [getEffectCommand, visibility.welcome])
 
   const handlePerformance = useCallback((metrics: ParticlePerformance) => setPerformance(metrics), [])
   const handleEngineError = useCallback((message: string | null) => setEngineError(message), [])
@@ -73,7 +83,7 @@ function App() {
       <div className="dashboard-shell">
         <section className="particle-viewport" aria-label="Interactive particle viewport">
           <ParticleScene
-            getEffectCommand={getEffectCommand} getSettings={getSettings}
+            getEffectCommand={getSceneEffectCommand} getSettings={getSettings}
             onPerformance={handlePerformance} onEngineError={handleEngineError}
           />
           {!visibility.welcome && <GestureGuide state={gestureState} />}
