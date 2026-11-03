@@ -3,10 +3,8 @@ import Icon from '../ui/Icon'
 
 interface AppHeaderProps {
   cameraStatus: TrackingStatus
-  presentationMode: boolean
   onHelp: () => void
   onFullscreen: () => void
-  onPresentation: () => void
 }
 
 function cameraLabel(status: TrackingStatus): string {
@@ -18,10 +16,8 @@ function cameraLabel(status: TrackingStatus): string {
 
 export default function AppHeader({
   cameraStatus,
-  presentationMode,
   onHelp,
   onFullscreen,
-  onPresentation,
 }: AppHeaderProps) {
   const cameraActive = cameraStatus === 'active' || cameraStatus === 'no-hands'
   return (
@@ -36,13 +32,6 @@ export default function AppHeader({
         <span className="mode-chip">Gesture control</span>
       </div>
       <nav className="header-actions" aria-label="Application actions">
-        <button
-          className={`presentation-button ${presentationMode ? 'is-active' : ''}`}
-          type="button"
-          onClick={onPresentation}
-        >
-          <Icon name="presentation" /> Present
-        </button>
         <button className="icon-button" type="button" onClick={onFullscreen} aria-label="Toggle fullscreen" title="Fullscreen">
           <Icon name="fullscreen" />
         </button>

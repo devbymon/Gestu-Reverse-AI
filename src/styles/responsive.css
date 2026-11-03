@@ -9,8 +9,6 @@
   .app-brand { min-width: 0; flex: 1; }
   .app-brand > div:last-child > span, .brand-mark, .header-status, .header-actions > .icon-button { display: none; }
   .app-brand strong { font-size: 13px; }
-  .presentation-button { padding: 0 9px; font-size: 0; }
-  .presentation-button svg { width: 16px; height: 16px; }
   .viewport-overlay { display: none; }
   .viewport-overlay div:nth-child(n+3) { display: none; }
   .particle-viewport::after { inset: 12px; }

@@ -38,7 +38,7 @@ function App() {
   const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
   const particleEffects = useParticleEffects(commandRef)
   const { settings, visibility, getSettings, updateSettings, setVisible, dismissWelcome } = dashboard
-  const { presentationMode, requestFullscreen, enterPresentation, exitPresentation } = presentation
+  const { presentationMode, requestFullscreen, exitPresentation } = presentation
   const { getEffectCommand } = particleEffects
   const activeEffect = visibility.welcome
     ? 'WORLD'
@@ -59,11 +59,6 @@ function App() {
     dismissWelcome()
   }, [dismissWelcome])
 
-  const togglePresentation = useCallback(() => {
-    if (presentationMode) void exitPresentation()
-    else void enterPresentation()
-  }, [enterPresentation, exitPresentation, presentationMode])
-
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && presentationMode) void exitPresentation()
@@ -75,10 +70,9 @@ function App() {
   return (
     <main className={`dashboard-app ${presentationMode ? 'is-presentation' : ''}`}>
       <AppHeader
-        cameraStatus={trackingState.status} presentationMode={presentationMode}
+        cameraStatus={trackingState.status}
         onHelp={() => setVisible('help', true)}
         onFullscreen={() => void requestFullscreen()}
-        onPresentation={togglePresentation}
       />
       <div className="dashboard-shell">
         <section className="particle-viewport" aria-label="Interactive particle viewport">

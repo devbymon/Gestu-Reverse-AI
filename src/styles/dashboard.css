@@ -13,8 +13,6 @@
 .header-status span { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
 .mode-chip { padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; color: #b8c4d7; }
 .header-actions { display: flex; align-items: center; gap: 7px; }
-.presentation-button { height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px; background: #151925; display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 11px; }
-.presentation-button:hover, .presentation-button.is-active { color: #fff; border-color: #64748b; background: #1b2130; }
 
 .dashboard-shell { position: relative; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
 .particle-viewport { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: radial-gradient(circle at 50% 48%, rgb(33 65 125 / 15%), transparent 42%), #04060c; }
