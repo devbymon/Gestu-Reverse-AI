@@ -15,7 +15,7 @@ export interface ParticlePerformance {
   quality: 'high' | 'balanced'
 }
 
-export type ParticlePaletteId = 'ULACIT' | 'COSMIC' | 'PLASMA' | 'AURORA' | 'MONOCHROME' | 'CUSTOM'
+export type ParticlePaletteId = 'ULACIT' | 'COSMIC' | 'PLASMA' | 'AURORA' | 'MONOCHROME' | 'NEON_PULSE' | 'CUSTOM'
 
 export interface ParticleSettings {
   particleCount: number
