@@ -271,6 +271,88 @@
   text-transform: uppercase;
 }
 
+.gesture-indicator {
+  padding: 10px 0 2px;
+  border-bottom: 1px solid rgb(148 163 184 / 10%);
+}
+
+.gesture-indicator__topline {
+  display: flex;
+  justify-content: space-between;
+  color: #475569;
+  font: 6px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gesture-indicator__topline span:last-child {
+  color: #64748b;
+}
+
+.gesture-indicator__topline .is-stable {
+  color: #00e5ff;
+}
+
+.gesture-indicator > strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 6px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gesture-effect {
+  display: block;
+  margin-top: 2px;
+  color: #a855f7;
+  font: 7px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.gesture-meter {
+  overflow: hidden;
+  height: 2px;
+  margin-top: 8px;
+  background: rgb(148 163 184 / 12%);
+}
+
+.gesture-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #00e5ff, #a855f7);
+  box-shadow: 0 0 8px #00e5ff;
+  transition: width 100ms linear;
+}
+
+.gesture-debug {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.gesture-debug div {
+  min-width: 0;
+}
+
+.gesture-debug dt,
+.gesture-debug dd {
+  overflow: hidden;
+  margin: 0;
+  font: 6px/1.4 'SFMono-Regular', Consolas, monospace;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.gesture-debug dt { color: #475569; }
+.gesture-debug dd { margin-top: 1px; color: #94a3b8; }
+
 .camera-panel__index {
   display: grid !important;
   width: 25px;
@@ -517,12 +599,13 @@
 
 @media (max-width: 760px) {
   .app {
-    grid-template-rows: auto minmax(650px, 1fr) auto;
+    overflow: auto;
+    grid-template-rows: auto minmax(820px, 1fr) auto;
   }
 
   .particle-stage {
     top: 100px;
-    bottom: 300px;
+    bottom: 460px;
   }
 
   .hero-copy {

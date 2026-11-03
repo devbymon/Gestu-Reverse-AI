@@ -4,11 +4,29 @@ import HandLandmarkOverlay, {
   type HandLandmarkOverlayHandle,
 } from './HandLandmarkOverlay'
 import HandTrackingStatus from './HandTrackingStatus'
+import GestureIndicator from './GestureIndicator'
+import type { HandTrackingFrame } from '../types/handTracking'
+import type { GestureRecognitionState } from '../types/gestures'
 
-export default function CameraPreview() {
+interface CameraPreviewProps {
+  gestureState: GestureRecognitionState
+  onTrackingFrame: (frame: HandTrackingFrame) => void
+  onTrackingReset: () => void
+}
+
+export default function CameraPreview({
+  gestureState,
+  onTrackingFrame,
+  onTrackingReset,
+}: CameraPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const overlayRef = useRef<HandLandmarkOverlayHandle>(null)
-  const { state, enableCamera, disableCamera } = useHandTracking(videoRef, overlayRef)
+  const { state, enableCamera, disableCamera } = useHandTracking(
+    videoRef,
+    overlayRef,
+    onTrackingFrame,
+    onTrackingReset,
+  )
   const isTransitioning = state.status === 'requesting-permission' || state.status === 'initializing'
   const isRunning = state.status === 'active' || state.status === 'no-hands'
 
@@ -53,6 +71,7 @@ export default function CameraPreview() {
       </div>
 
       <HandTrackingStatus state={state} />
+      <GestureIndicator state={gestureState} />
 
       <button
         className={`camera-button ${isRunning ? 'camera-button--stop' : ''}`}

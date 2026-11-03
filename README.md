@@ -2,22 +2,20 @@
 
 An immersive React and Three.js experiment for controlling a real-time 3D particle system with hand gestures. The project is being delivered in independent, verifiable phases.
 
-## Current status: Phase 2 — AI Hand Tracking
+## Current status: Phase 3 — Gesture Recognition & Particle Interaction
 
-The Phase 1 particle engine remains intact and the current build now adds:
+The particle engine and hand-tracking system remain intact. Phase 3 adds:
 
-- Camera activation only after an explicit user action.
-- MediaPipe Hand Landmarker detection for up to two hands.
-- 21 normalized landmarks and 21 world landmarks per detected hand.
-- Left/right handedness and an approximate palm center for Phase 3.
-- A mirrored 640 × 480 preview with a Canvas 2D skeleton overlay.
-- GPU initialization with automatic CPU fallback.
-- Camera, model, tracking, no-hands, and error states.
-- Stream interruption handling and complete track/model cleanup.
-- Detection capped at 30 FPS without processing the same video frame twice.
-- High-frequency tracking data stored in a ref instead of React state.
+- Orientation- and scale-aware finger classification using joint angles and relative distances.
+- Closed Fist, Open Palm, Index Point, Peace Sign, Pinch, Hand Swipe, and Two-Hand Expansion.
+- Exponential landmark smoothing, three-frame confirmation, pinch hysteresis, and swipe cooldown.
+- A decoupled `GestureCommand` contract between computer vision and Three.js.
+- Compact sphere, controlled expansion, vortex, wave, implosion, and directional impulse effects.
+- A live gesture panel showing effect, interaction intensity, candidate, and stabilization state.
+- Immediate reset when hand tracking is lost, while the ambient particle animation continues.
+- Synthetic unit tests for classification, scale invariance, transitions, swipe, cooldown, and tracking loss.
 
-Gesture classification and particle control are intentionally outside Phase 2.
+Advanced Phase 4 formations and the full Phase 5 dashboard are intentionally not included.
 
 ## Requirements
 
@@ -41,7 +39,9 @@ Then open the local URL printed by Vite.
 3. Place one hand in frame and confirm that 21 points, connections, and a handedness label follow it.
 4. Add a second hand and confirm that both skeletons are visible with different colors.
 5. Move both hands out of frame and confirm the **No Hands Detected** state.
-6. Select **Disable Camera** and confirm that the browser camera indicator turns off.
+6. Exercise each gesture listed below and verify that the gesture label stabilizes before the effect changes.
+7. Swipe once, verify the directional impulse, and confirm it does not repeatedly fire during cooldown.
+8. Select **Disable Camera** and confirm that the browser camera indicator turns off.
 
 Physical camera and one/two-hand detection must be validated manually because they require a real camera and browser permission.
 
@@ -50,6 +50,7 @@ Physical camera and one/two-hand detection must be validated manually because th
 ```bash
 npm run lint
 npm run build
+npm test
 ```
 
 ## Architecture
@@ -58,6 +59,8 @@ npm run build
 src/
 ├── components/
 │   ├── CameraPreview.tsx        Camera panel and explicit controls
+│   ├── GestureIndicator.tsx     Stable gesture and active-effect display
+│   ├── GestureDebugPanel.tsx    Candidate and interaction diagnostics
 │   ├── HandLandmarkOverlay.tsx Canvas 2D hand skeleton rendering
 │   ├── HandTrackingStatus.tsx  Model and tracking status
 │   └── ParticleScene.tsx       Particle lifecycle and performance overlay
@@ -66,23 +69,41 @@ src/
 │   ├── ParticleFormations.ts   Reusable particle target generation
 │   └── ParticlePhysics.ts      Spring/damping simulation
 ├── hooks/
-│   └── useHandTracking.ts      Camera and inference lifecycle
+│   ├── useGestureRecognition.ts Gesture controller bridge and UI throttling
+│   └── useHandTracking.ts       Camera and inference lifecycle
 ├── services/
-│   └── handTrackingService.ts  MediaPipe initialization and result mapping
+│   ├── gestureController.ts     Temporal classification and command generation
+│   └── handTrackingService.ts   MediaPipe initialization and result mapping
 ├── types/
-│   ├── handTracking.ts         Phase 3-ready tracking contracts
+│   ├── gestures.ts              Gesture, command, and UI contracts
+│   ├── handTracking.ts          Tracking contracts
 │   └── particles.ts            Interaction and performance contracts
 ├── utils/
-│   └── landmarkUtils.ts        Palm and relative-distance geometry
+│   ├── gestureGeometry.ts       Angles, hand scale, finger and pinch geometry
+│   ├── gestureRecognition.ts    Pure single-hand classification
+│   ├── gestureSmoothing.ts      Landmark smoothing and gesture stabilization
+│   └── landmarkUtils.ts         Palm and relative-distance geometry
 ├── App.tsx
 └── App.css
 ```
 
 The MediaPipe module is loaded lazily only after camera permission is granted. Inference results update a mutable ref every processed frame; React state changes only when the tracking status, hand count, or handedness changes.
 
-## Interaction contract
+## Gestures and particle actions
 
-`useHandTracking()` exposes a `latestFrameRef` containing normalized landmarks, world landmarks, handedness, palm position, hand count, and the last detection timestamp. Phase 3 can consume this data without coupling gesture recognition to camera or rendering code.
+| Gesture | Action |
+| --- | --- |
+| Closed Fist | Compact rotating sphere |
+| Open Palm | Controlled radial expansion |
+| Index Point | Hand-positioned vortex |
+| Peace Sign | Animated 3D particle wave |
+| Pinch | Continuous implosion toward the hand |
+| Hand Swipe | One-shot directional velocity impulse |
+| Two-Hand Expansion | High-energy expansion controlled by palm distance |
+
+`GestureCommand` contains only gesture, intensity, normalized position/direction, and timestamp. The particle engine never imports MediaPipe types and consumes commands independently from the 30 FPS inference cadence.
+
+Priority is Two-Hand Expansion → Swipe → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. Swipe is a transient event; all other gestures are continuous and stabilized before activation.
 
 ## MediaPipe assets
 
@@ -99,13 +120,14 @@ The checked-in model and WASM files allow the tracking runtime to load without a
 - `react` / `react-dom`: interface and lifecycle.
 - `three`: WebGL rendering, buffers, shaders, and camera math.
 - `@mediapipe/tasks-vision`: on-device hand landmark inference.
+- `vitest`: TypeScript unit tests for deterministic gesture logic.
 - Vite, TypeScript, and ESLint: development, compilation, and static checks.
 
 ## Roadmap
 
 1. **Particle Engine** — complete.
-2. **Hand Tracking** — current phase.
-3. **Gesture Recognition** — robust landmark geometry, smoothing, and hysteresis.
+2. **Hand Tracking** — complete.
+3. **Gesture Recognition** — current phase.
 4. **Advanced Visual Effects** — galaxy, heart, spiral, wave, burst, and implosion.
 5. **UI/UX Dashboard** — controls, preview, gesture state, and demo mode.
 6. **Testing & Optimization** — cross-browser validation, profiling, and security review.
