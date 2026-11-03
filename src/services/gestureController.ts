@@ -19,7 +19,6 @@ const EFFECT_NAMES: Record<GestureType, string> = {
   INDEX_POINT: 'Particle Vortex',
   PEACE: 'Particle Wave',
   PINCH: 'Particle Implosion',
-  THREE_FINGERS: 'Kinetic Push',
   TWO_HAND_EXPANSION: 'Dual Energy Expansion',
   UNKNOWN: 'Ambient Sphere',
 }
@@ -108,7 +107,6 @@ export class GestureController {
     if (gesture === 'PEACE') return clamp(0.55 + Math.abs(verticalPosition) * 0.45)
     if (gesture === 'OPEN_PALM') return 0.72
     if (gesture === 'INDEX_POINT') return 0.68
-    if (gesture === 'THREE_FINGERS') return 0.82
     if (gesture === 'FIST') return 0.62
     return 0
   }

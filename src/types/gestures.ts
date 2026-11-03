@@ -4,7 +4,6 @@ export type GestureType =
   | 'INDEX_POINT'
   | 'PEACE'
   | 'PINCH'
-  | 'THREE_FINGERS'
   | 'TWO_HAND_EXPANSION'
   | 'UNKNOWN'
 

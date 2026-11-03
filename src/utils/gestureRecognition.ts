@@ -42,14 +42,6 @@ export function classifyHandGesture(
       extendedFingerCount: extended,
     }
   }
-  if (states.index && states.middle && states.ring && !states.pinky) {
-    return {
-      gesture: 'THREE_FINGERS',
-      heuristicScore: 0.9,
-      pinchRatio,
-      extendedFingerCount: extended,
-    }
-  }
   if (states.index && states.middle && !states.ring && !states.pinky) {
     return { gesture: 'PEACE', heuristicScore: flexed / 4, pinchRatio, extendedFingerCount: extended }
   }

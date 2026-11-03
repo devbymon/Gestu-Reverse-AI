@@ -11,7 +11,7 @@ The particle engine, hand tracking, gesture recognition, and advanced effects re
 - A floating Phase 2-style camera with landmarks, tracking state, and a color-coded gesture stage.
 - A live Gesture Map plus a compact color studio with presets and unrestricted custom colors.
 - Pastel orange landmarks for the left hand and violet landmarks for the right hand.
-- Three-finger Push detection uses the raised index, middle, and ring fingers while continuous gesture classification stays smoothed.
+- Continuous gesture classification stays smoothed to prevent unstable particle transitions.
 - Live measured FPS, particle count, renderer state, camera state, and MediaPipe state.
 - Launch onboarding, a reusable gesture guide, fullscreen support, and an in-app presentation mode.
 - Keyboard focus states, accessible labels, reduced decorative motion, and desktop/tablet/mobile layouts.
@@ -40,7 +40,7 @@ Then open the local URL printed by Vite.
 4. Add a second hand and confirm that both skeletons are visible with different colors.
 5. Move both hands out of frame and confirm the **No Hands Detected** state.
 6. Exercise each gesture listed below and verify that the gesture label stabilizes before the effect changes.
-7. Raise the index, middle, and ring fingers, verify the push, and confirm it fires once when entering the gesture.
+7. Hold each supported pose briefly and confirm that its particle effect activates after stabilization.
 8. Exercise the supported gestures and confirm each transition starts from the currently visible positions.
 9. Select **Disable Camera** and confirm that the browser camera indicator turns off.
 10. Open **Colors**, try a preset and custom colors, and confirm particles update without restarting WebGL.
@@ -126,12 +126,11 @@ The MediaPipe module is loaded lazily only after camera permission is granted. I
 | Index Point | Hand-positioned vortex |
 | Peace Sign | Animated 3D particle wave |
 | Pinch | Continuous implosion toward the hand |
-| Three Fingers | One-shot radial particle push |
 | Two-Hand Expansion | High-energy expansion controlled by palm distance |
 
 `GestureCommand` remains independent from MediaPipe. `useParticleEffects()` maps it into a generic `ParticleEffectCommand`, which is the only interaction contract consumed by the renderer. Gestures are the sole formation source.
 
-Priority is Two-Hand Expansion → Three Fingers → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. All gestures are stabilized before activation; Three Fingers triggers Push once when the pose becomes active.
+Priority is Two-Hand Expansion → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. All gestures are stabilized before activation.
 
 ## Formation mathematics
 

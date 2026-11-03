@@ -16,22 +16,6 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
     if (gestureCommand.timestamp === lastGestureTimestampRef.current) return gestureEffectRef.current
     lastGestureTimestampRef.current = gestureCommand.timestamp
 
-    if (gestureCommand.gesture === 'THREE_FINGERS') {
-      if (lastGestureTypeRef.current !== 'THREE_FINGERS') triggerIdRef.current += 1
-      lastGestureTypeRef.current = 'THREE_FINGERS'
-      gestureEffectRef.current = {
-        ...gestureEffectRef.current,
-        source: 'GESTURE',
-        intensity: gestureCommand.intensity,
-        position: gestureCommand.position,
-        direction: undefined,
-        trigger: 'RADIAL_PUSH',
-        triggerId: triggerIdRef.current,
-        timestamp: gestureCommand.timestamp,
-      }
-      return gestureEffectRef.current
-    }
-
     const effect = getGestureFormation(gestureCommand.gesture)
     const gestureChanged = gestureCommand.gesture !== lastGestureTypeRef.current
     if (gestureChanged) triggerIdRef.current += 1

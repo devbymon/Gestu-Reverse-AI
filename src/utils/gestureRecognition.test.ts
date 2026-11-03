@@ -9,7 +9,7 @@ import type { GestureType } from '../types/gestures'
 import { calculatePalmPosition } from './landmarkUtils'
 import { classifyHandGesture } from './gestureRecognition'
 
-type HandPose = 'open' | 'fist' | 'index' | 'peace' | 'three' | 'pinch' | 'unknown'
+type HandPose = 'open' | 'fist' | 'index' | 'peace' | 'pinch' | 'unknown'
 
 const FINGERS = [
   [5, 6, 7, 8],
@@ -34,7 +34,6 @@ function createLandmarks(pose: HandPose, scale = 1, shiftX = 0): NormalizedHandL
     fist: [false, false, false, false],
     index: [true, false, false, false],
     peace: [true, true, false, false],
-    three: [true, true, true, false],
     pinch: [true, true, true, true],
     unknown: [true, false, true, false],
   }
@@ -106,7 +105,6 @@ describe('gesture classification', () => {
     ['open', 'OPEN_PALM'],
     ['index', 'INDEX_POINT'],
     ['peace', 'PEACE'],
-    ['three', 'THREE_FINGERS'],
     ['pinch', 'PINCH'],
     ['unknown', 'UNKNOWN'],
   ])('classifies %s landmarks as %s', (pose, expected) => {
@@ -138,15 +136,6 @@ describe('gesture controller', () => {
   it('recognizes two open hands after stabilization', () => {
     const controller = new GestureController()
     expect(stabilize(controller, 'open', 2)).toBe('TWO_HAND_EXPANSION')
-  })
-
-  it('recognizes three raised fingers as a stable push gesture', () => {
-    const controller = new GestureController()
-    expect(stabilize(controller, 'three')).toBe('THREE_FINGERS')
-    const held = controller.process(frame(160, createHand('three')))
-    expect(held.command.gesture).toBe('THREE_FINGERS')
-    expect(held.command.intensity).toBe(0.82)
-    expect(held.state.isTransient).toBe(false)
   })
 
   it('resets immediately when tracking is lost', () => {

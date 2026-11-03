@@ -5,7 +5,7 @@ import { GESTURE_PRESENTATION, getDisplayedGesture } from '../../utils/gesturePr
 interface GestureGuideProps { state: GestureRecognitionState }
 
 const GUIDE_GESTURES: GestureType[] = [
-  'FIST', 'OPEN_PALM', 'INDEX_POINT', 'PEACE', 'PINCH', 'THREE_FINGERS', 'TWO_HAND_EXPANSION',
+  'FIST', 'OPEN_PALM', 'INDEX_POINT', 'PEACE', 'PINCH', 'TWO_HAND_EXPANSION',
 ]
 
 export default function GestureGuide({ state }: GestureGuideProps) {

@@ -4,7 +4,7 @@ interface HelpPanelProps { open: boolean; onClose: () => void }
 
 const gestures = [
   ['Fist', 'Sphere'], ['Open palm', 'Energy burst'], ['Point', 'Vortex'],
-  ['Peace sign', 'Wave'], ['Pinch', 'Implosion'], ['Three fingers', 'Push'],
+  ['Peace sign', 'Wave'], ['Pinch', 'Implosion'],
   ['Two hands', 'Expansion'],
 ]
 
@@ -21,7 +21,7 @@ export default function HelpPanel({ open, onClose }: HelpPanelProps) {
         <div className="gesture-guide">
           {gestures.map(([gesture, effect]) => <div key={gesture}><span>{gesture}</span><strong>{effect}</strong></div>)}
         </div>
-        <div className="help-note"><Icon name="hand" /><p><strong>Tracking tip</strong><br />Use even lighting and keep your full hand visible. For Push, raise your index, middle, and ring fingers while keeping the pinky closed.</p></div>
+        <div className="help-note"><Icon name="hand" /><p><strong>Tracking tip</strong><br />Use even lighting, keep your full hand visible, and hold each pose briefly while it stabilizes.</p></div>
         <p className="help-privacy">All vision inference runs locally. No image or video is uploaded or stored.</p>
       </aside>
     </div>

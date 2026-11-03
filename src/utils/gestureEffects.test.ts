@@ -12,10 +12,6 @@ describe('gesture effect mapping', () => {
     expect(getGestureFormation('UNKNOWN')).toBe('SPHERE')
   })
 
-  it('keeps the underlying formation while three fingers trigger push', () => {
-    expect(getGestureFormation('THREE_FINGERS', 'PEACE')).toBe('WAVE')
-  })
-
   it('shows the candidate while a gesture is stabilizing', () => {
     expect(getDisplayedGesture('UNKNOWN', 'PINCH')).toBe('PINCH')
     expect(getDisplayedGesture('FIST', 'OPEN_PALM')).toBe('FIST')
