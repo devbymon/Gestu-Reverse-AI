@@ -30,6 +30,6 @@ describe('particle settings', () => {
       palette: 'CUSTOM',
       customColors: ['#123456', 'invalid', '#abcdef'],
     })
-    expect(settings.customColors).toEqual(['#123456', '#f97316', '#abcdef'])
+    expect(settings.customColors).toEqual(['#123456', '#ffffff', '#abcdef'])
   })
 })

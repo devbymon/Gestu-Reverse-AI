@@ -212,7 +212,9 @@ export class ParticleEngine {
     positionAttribute.needsUpdate = true
 
     this.energy = Math.max(0, this.energy - simulationDelta * 0.7)
-    this.uniforms.uEnergy.value = this.energy
+    this.uniforms.uEnergy.value = this.currentCommand.effect === 'FALCON'
+      ? Math.max(this.energy, 0.72)
+      : this.energy
     const preset = getEffectPreset(this.currentCommand.effect)
     points.rotation.y += simulationDelta * preset.rotationSpeed
     points.rotation.x = Math.sin(elapsed * 0.2) * 0.08
@@ -364,7 +366,7 @@ export class ParticleEngine {
       const offset = index * 3
       if (this.currentCommand.effect === 'FALCON') {
         const region = index / this.particleCount
-        const colorIndex = region < 0.67 ? 0 : region < 0.82 ? 2 : 1
+        const colorIndex = region < 0.67 ? 0 : region < 0.82 ? 1 : 2
         mixed.copy(colors[colorIndex] ?? colors[0])
       } else {
         const palettePosition = (index % 197) / 196

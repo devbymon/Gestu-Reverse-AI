@@ -7,7 +7,7 @@ export interface ParticlePalette {
 }
 
 export const PARTICLE_PALETTES: readonly ParticlePalette[] = [
-  { id: 'ULACIT', name: 'ULACIT', colors: ['#6d28d9', '#f97316', '#22c55e'] },
+  { id: 'ULACIT', name: 'ULACIT', colors: ['#8b5cf6', '#ffffff', '#ff8a00'] },
   { id: 'COSMIC', name: 'Cosmic', colors: ['#00e5ff', '#2563eb', '#a855f7'] },
   { id: 'PLASMA', name: 'Plasma', colors: ['#f8fafc', '#ec4899', '#a855f7'] },
   { id: 'AURORA', name: 'Aurora', colors: ['#00e5ff', '#22c55e', '#2563eb'] },

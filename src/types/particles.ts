@@ -33,7 +33,7 @@ export const DEFAULT_PARTICLE_SETTINGS: ParticleSettings = {
   animationSpeed: 1,
   interactionSensitivity: 1,
   palette: 'ULACIT',
-  customColors: ['#6d28d9', '#f97316', '#22c55e'],
+  customColors: ['#8b5cf6', '#ffffff', '#ff8a00'],
   revision: 0,
 }
 
