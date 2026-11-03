@@ -2,8 +2,8 @@ import type { EffectPreset, FormationType } from '../types/particleEffects'
 
 export const EFFECT_PRESETS: readonly EffectPreset[] = [
   {
-    id: 'FALCON', name: 'ULACIT Falcon', description: 'Particle falcon resting formation',
-    transitionDuration: 0.85, particleSize: 1.95, rotationSpeed: 0,
+    id: 'WORLD', name: 'World Class Globe', description: 'ULACIT-inspired particle world',
+    transitionDuration: 0.9, particleSize: 1.7, rotationSpeed: 0.085,
     colors: ['#8b5cf6', '#ffffff', '#c4b5fd'],
   },
   {

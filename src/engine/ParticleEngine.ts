@@ -212,7 +212,7 @@ export class ParticleEngine {
     positionAttribute.needsUpdate = true
 
     this.energy = Math.max(0, this.energy - simulationDelta * 0.7)
-    this.uniforms.uEnergy.value = this.currentCommand.effect === 'FALCON'
+    this.uniforms.uEnergy.value = this.currentCommand.effect === 'WORLD'
       ? Math.max(this.energy, 0.72)
       : this.energy
     const preset = getEffectPreset(this.currentCommand.effect)
@@ -364,7 +364,7 @@ export class ParticleEngine {
     const sizeArray = sizeAttribute.array as Float32Array
     for (let index = 0; index < this.particleCount; index += 1) {
       const offset = index * 3
-      if (this.currentCommand.effect === 'FALCON') {
+      if (this.currentCommand.effect === 'WORLD') {
         const colorMix = ((index * 37) % 101) / 100
         mixed.copy(colors[0]).lerp(colors[1] ?? colors[0], colorMix)
       } else {

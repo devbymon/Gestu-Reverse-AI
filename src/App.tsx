@@ -24,7 +24,7 @@ const INITIAL_TRACKING_STATE: HandTrackingState = {
 }
 
 const CAMERA_PREVIEW_EFFECT: ParticleEffectCommand = {
-  effect: 'FALCON', source: 'GESTURE', intensity: 0.35, triggerId: 0, timestamp: -1,
+  effect: 'WORLD', source: 'GESTURE', intensity: 0.35, triggerId: 0, timestamp: -1,
 }
 
 function App() {
@@ -41,7 +41,7 @@ function App() {
   const { presentationMode, requestFullscreen, enterPresentation, exitPresentation } = presentation
   const { getEffectCommand } = particleEffects
   const activeEffect = visibility.welcome
-    ? 'FALCON'
+    ? 'WORLD'
     : getGestureFormation(gestureState.gesture, gestureState.candidate)
   const getSceneEffectCommand = useCallback(() => (
     visibility.welcome ? CAMERA_PREVIEW_EFFECT : getEffectCommand()
