@@ -365,9 +365,8 @@ export class ParticleEngine {
     for (let index = 0; index < this.particleCount; index += 1) {
       const offset = index * 3
       if (this.currentCommand.effect === 'FALCON') {
-        const region = index / this.particleCount
-        const colorIndex = region < 0.78 ? 0 : region < 0.94 ? 1 : 2
-        mixed.copy(colors[colorIndex] ?? colors[0])
+        const colorMix = ((index * 37) % 101) / 100
+        mixed.copy(colors[0]).lerp(colors[1] ?? colors[0], colorMix)
       } else {
         const palettePosition = (index % 197) / 196
         const scaled = palettePosition * (colors.length - 1)
