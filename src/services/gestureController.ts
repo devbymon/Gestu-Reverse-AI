@@ -6,22 +6,16 @@ import type {
   GestureThresholds,
   GestureType,
 } from '../types/gestures'
-import { normalizedPalmToCommand } from '../utils/gestureGeometry'
+import { calculateSnapRatio, normalizedPalmToCommand } from '../utils/gestureGeometry'
 import {
   classifyHandGesture,
   DEFAULT_GESTURE_THRESHOLDS,
 } from '../utils/gestureRecognition'
 import { GestureStabilizer, LandmarkSmoother } from '../utils/gestureSmoothing'
 
-interface PalmSample {
-  x: number
-  y: number
-  timestamp: number
-}
-
-interface SwipeMotion {
-  direction: { x: number; y: number }
-  speed: number
+interface SnapContact {
+  contactAt: number | null
+  minimumRatio: number
 }
 
 const EFFECT_NAMES: Record<GestureType, string> = {
@@ -30,12 +24,12 @@ const EFFECT_NAMES: Record<GestureType, string> = {
   INDEX_POINT: 'Particle Vortex',
   PEACE: 'Particle Wave',
   PINCH: 'Particle Implosion',
-  SWIPE: 'Kinetic Push',
+  SNAP: 'Kinetic Push',
   TWO_HAND_EXPANSION: 'Dual Energy Expansion',
   UNKNOWN: 'Ambient Sphere',
 }
 
-const SWIPE_VISIBLE_MS = 320
+const SNAP_VISIBLE_MS = 320
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.min(maximum, Math.max(minimum, value))
@@ -44,10 +38,10 @@ function clamp(value: number, minimum = 0, maximum = 1): number {
 export class GestureController {
   private readonly smoother = new LandmarkSmoother()
   private readonly stabilizer: GestureStabilizer
-  private readonly palmHistory = new Map<string, PalmSample[]>()
-  private lastSwipeAt = Number.NEGATIVE_INFINITY
-  private swipeUntil = Number.NEGATIVE_INFINITY
-  private swipeCommand: GestureCommand | null = null
+  private readonly snapContacts = new Map<string, SnapContact>()
+  private lastSnapAt = Number.NEGATIVE_INFINITY
+  private snapUntil = Number.NEGATIVE_INFINITY
+  private snapCommand: GestureCommand | null = null
   private readonly thresholds: GestureThresholds
 
   constructor(thresholds: GestureThresholds = DEFAULT_GESTURE_THRESHOLDS) {
@@ -75,35 +69,30 @@ export class GestureController {
       ? 'TWO_HAND_EXPANSION'
       : classifications[0]?.gesture ?? 'UNKNOWN'
     const stabilization = this.stabilizer.update(baseGesture)
-    const swipe = this.findFastestSwipe(frame.hands, frame.timestamp)
-    const swipeEligible = classifications[0]?.gesture === 'OPEN_PALM' ||
-      this.stabilizer.current === 'OPEN_PALM'
+    const snapIntensity = this.detectSnap(frame.hands, frame.timestamp)
 
     if (
       !twoOpenHands &&
-      swipeEligible &&
-      swipe &&
-      frame.timestamp - this.lastSwipeAt >= this.thresholds.swipeCooldownMs
+      snapIntensity !== null &&
+      frame.timestamp - this.lastSnapAt >= this.thresholds.snapCooldownMs
     ) {
-      this.lastSwipeAt = frame.timestamp
-      this.swipeUntil = frame.timestamp + SWIPE_VISIBLE_MS
-      this.swipeCommand = {
-        gesture: 'SWIPE',
-        intensity: clamp(swipe.speed / 2.5),
+      this.lastSnapAt = frame.timestamp
+      this.snapUntil = frame.timestamp + SNAP_VISIBLE_MS
+      this.snapCommand = {
+        gesture: 'SNAP',
+        intensity: snapIntensity,
         position,
-        direction: swipe.direction,
         timestamp: frame.timestamp,
       }
-      this.palmHistory.clear()
     }
 
-    if (this.swipeCommand && frame.timestamp <= this.swipeUntil) {
+    if (this.snapCommand && frame.timestamp <= this.snapUntil) {
       return {
-        command: this.swipeCommand,
+        command: this.snapCommand,
         state: this.createState(
-          'SWIPE',
+          'SNAP',
           stabilization.candidate,
-          this.swipeCommand.intensity,
+          this.snapCommand.intensity,
           1,
           hands.length,
           true,
@@ -140,39 +129,46 @@ export class GestureController {
   reset(): void {
     this.smoother.reset()
     this.stabilizer.reset()
-    this.palmHistory.clear()
-    this.swipeCommand = null
-    this.swipeUntil = Number.NEGATIVE_INFINITY
-    this.lastSwipeAt = Number.NEGATIVE_INFINITY
+    this.snapContacts.clear()
+    this.snapCommand = null
+    this.snapUntil = Number.NEGATIVE_INFINITY
+    this.lastSnapAt = Number.NEGATIVE_INFINITY
   }
 
-  private findFastestSwipe(hands: TrackedHand[], timestamp: number): SwipeMotion | null {
-    let fastest: SwipeMotion | null = null
+  private detectSnap(hands: TrackedHand[], timestamp: number): number | null {
+    let strongestSnap: number | null = null
     for (const hand of hands) {
       const key = hand.handedness
-      const history = this.palmHistory.get(key) ?? []
-      history.push({ ...hand.palmPosition, timestamp })
-      const cutoff = timestamp - this.thresholds.swipeWindowMs
-      while (history.length > 0 && (history[0]?.timestamp ?? timestamp) < cutoff) history.shift()
-      this.palmHistory.set(key, history)
-      const first = history[0]
-      const last = history.at(-1)
-      if (!first || !last || last.timestamp <= first.timestamp) continue
-      const x = first.x - last.x
-      const y = first.y - last.y
-      const displacement = Math.hypot(x, y)
-      const speed = displacement / ((last.timestamp - first.timestamp) / 1_000)
-      if (
-        displacement < this.thresholds.swipeMinimumDisplacement ||
-        speed < this.thresholds.swipeMinimumSpeed ||
-        (fastest && speed <= fastest.speed)
-      ) continue
-      fastest = {
-        speed,
-        direction: { x: x / displacement, y: y / displacement },
+      const ratio = calculateSnapRatio(hand.landmarks)
+      const contact = this.snapContacts.get(key) ?? {
+        contactAt: null,
+        minimumRatio: Number.POSITIVE_INFINITY,
       }
+      if (ratio <= this.thresholds.snapContactRatio) {
+        contact.contactAt ??= timestamp
+        contact.minimumRatio = Math.min(contact.minimumRatio, ratio)
+      } else if (contact.contactAt !== null) {
+        const elapsed = timestamp - contact.contactAt
+        if (elapsed <= this.thresholds.snapWindowMs && ratio >= this.thresholds.snapReleaseRatio) {
+          const releaseEnergy = clamp(
+            (ratio - this.thresholds.snapReleaseRatio) /
+            Math.max(0.1, 1.35 - this.thresholds.snapReleaseRatio),
+          )
+          const contactEnergy = clamp(
+            1 - contact.minimumRatio / this.thresholds.snapContactRatio,
+          )
+          const intensity = 0.65 + (releaseEnergy * 0.2 + contactEnergy * 0.15)
+          strongestSnap = Math.max(strongestSnap ?? 0, intensity)
+          contact.contactAt = null
+          contact.minimumRatio = Number.POSITIVE_INFINITY
+        } else if (elapsed > this.thresholds.snapWindowMs) {
+          contact.contactAt = null
+          contact.minimumRatio = Number.POSITIVE_INFINITY
+        }
+      }
+      this.snapContacts.set(key, contact)
     }
-    return fastest
+    return strongestSnap
   }
 
   private calculateIntensity(

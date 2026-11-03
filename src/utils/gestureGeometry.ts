@@ -107,6 +107,13 @@ export function calculatePinchRatio(landmarks: NormalizedHandLandmark[]): number
   return distance3D(thumbTip, indexTip) / estimateHandScale(landmarks)
 }
 
+export function calculateSnapRatio(landmarks: NormalizedHandLandmark[]): number {
+  const thumbTip = landmarks[4]
+  const middleTip = landmarks[12]
+  if (!thumbTip || !middleTip) return Number.POSITIVE_INFINITY
+  return distance3D(thumbTip, middleTip) / estimateHandScale(landmarks)
+}
+
 export function normalizedPalmToCommand(position: PalmPosition): { x: number; y: number } {
   return {
     x: Math.min(1, Math.max(-1, (0.5 - position.x) * 2)),

@@ -13,7 +13,7 @@ export const GESTURE_PRESENTATION: Record<GestureType, GesturePresentation> = {
   INDEX_POINT: { label: 'Point', action: 'Vortex', symbol: 'PT', color: '#a78bfa' },
   PEACE: { label: 'Peace', action: 'Wave', symbol: 'PE', color: '#60a5fa' },
   PINCH: { label: 'Pinch', action: 'Implode', symbol: 'PI', color: '#f472b6' },
-  SWIPE: { label: 'Swipe', action: 'Push', symbol: 'SW', color: '#34d399' },
+  SNAP: { label: 'Snap', action: 'Push', symbol: 'SN', color: '#34d399' },
   TWO_HAND_EXPANSION: { label: 'Two hands', action: 'Expand', symbol: '2H', color: '#fb923c' },
   UNKNOWN: { label: 'Waiting', action: 'Sphere', symbol: '—', color: '#64748b' },
 }

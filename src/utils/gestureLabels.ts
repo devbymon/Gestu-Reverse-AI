@@ -6,7 +6,7 @@ export const GESTURE_LABELS: Record<GestureType, string> = {
   INDEX_POINT: 'Index Point',
   PEACE: 'Peace Sign',
   PINCH: 'Pinch',
-  SWIPE: 'Hand Swipe',
+  SNAP: 'Finger Snap',
   TWO_HAND_EXPANSION: 'Two-Hand Expansion',
   UNKNOWN: 'No Gesture Detected',
 }

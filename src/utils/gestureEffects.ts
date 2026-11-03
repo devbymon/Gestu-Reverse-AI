@@ -1,7 +1,7 @@
 import type { GestureType } from '../types/gestures'
 import type { FormationType } from '../types/particleEffects'
 
-const GESTURE_EFFECTS: Record<Exclude<GestureType, 'SWIPE'>, FormationType> = {
+const GESTURE_EFFECTS: Record<Exclude<GestureType, 'SNAP'>, FormationType> = {
   FIST: 'SPHERE',
   OPEN_PALM: 'ENERGY_BURST',
   INDEX_POINT: 'VORTEX',
@@ -12,6 +12,6 @@ const GESTURE_EFFECTS: Record<Exclude<GestureType, 'SWIPE'>, FormationType> = {
 }
 
 export function getGestureFormation(gesture: GestureType, fallback: GestureType = 'UNKNOWN'): FormationType {
-  const resolved = gesture === 'SWIPE' ? fallback : gesture
-  return resolved === 'SWIPE' ? 'SPHERE' : GESTURE_EFFECTS[resolved]
+  const resolved = gesture === 'SNAP' ? fallback : gesture
+  return resolved === 'SNAP' ? 'SPHERE' : GESTURE_EFFECTS[resolved]
 }

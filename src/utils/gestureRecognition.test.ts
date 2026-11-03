@@ -80,6 +80,20 @@ function createHand(
   }
 }
 
+function createSnapHand(contact: boolean): TrackedHand {
+  const hand = createHand('unknown')
+  const landmarks = hand.landmarks.map((landmark) => ({ ...landmark }))
+  const middleTip = landmarks[12]!
+  landmarks[4] = contact
+    ? point(middleTip.x - 0.004, middleTip.y + 0.004)
+    : point(0.18, 0.62)
+  return {
+    ...hand,
+    landmarks,
+    palmPosition: calculatePalmPosition(landmarks),
+  }
+}
+
 function frame(timestamp: number, ...hands: TrackedHand[]): HandTrackingFrame {
   return { timestamp, hands }
 }
@@ -138,34 +152,31 @@ describe('gesture controller', () => {
     expect(stabilize(controller, 'open', 2)).toBe('TWO_HAND_EXPANSION')
   })
 
-  it('emits one transient swipe and respects its cooldown', () => {
+  it('emits one transient snap and respects its cooldown', () => {
     const controller = new GestureController()
-    controller.process(frame(0, createHand('open', 1, 0)))
-    controller.process(frame(50, createHand('open', 1, 0.2)))
-    const swipe = controller.process(frame(100, createHand('open', 1, 0.4)))
-    expect(swipe.command.gesture).toBe('SWIPE')
-    expect(swipe.command.direction?.x).toBeLessThan(0)
-    const heldSwipe = controller.process(frame(150, createHand('open', 1, 0.5)))
-    expect(heldSwipe.command.timestamp).toBe(swipe.command.timestamp)
-    controller.process(frame(320, createHand('open', 1, 0)))
-    const cooldownMotion = controller.process(frame(380, createHand('open', 1, 0.45)))
-    expect(cooldownMotion.command.gesture).not.toBe('SWIPE')
+    controller.process(frame(0, createSnapHand(true)))
+    const snap = controller.process(frame(120, createSnapHand(false)))
+    expect(snap.command.gesture).toBe('SNAP')
+    expect(snap.state.isTransient).toBe(true)
+    expect(snap.command.direction).toBeUndefined()
+
+    const heldSnap = controller.process(frame(200, createSnapHand(false)))
+    expect(heldSnap.command.timestamp).toBe(snap.command.timestamp)
+
+    controller.process(frame(500, createSnapHand(true)))
+    const cooldownSnap = controller.process(frame(560, createSnapHand(false)))
+    expect(cooldownSnap.command.gesture).not.toBe('SNAP')
+
+    controller.process(frame(800, createSnapHand(true)))
+    const nextSnap = controller.process(frame(880, createSnapHand(false)))
+    expect(nextSnap.command.gesture).toBe('SNAP')
   })
 
-  it('detects a moderate open-palm swipe from unsmoothed palm motion', () => {
+  it('does not detect a snap when the fingers separate too slowly', () => {
     const controller = new GestureController()
-    controller.process(frame(0, createHand('open', 1, 0)))
-    controller.process(frame(40, createHand('open', 1, 0.04)))
-    const swipe = controller.process(frame(80, createHand('open', 1, 0.08)))
-    expect(swipe.command.gesture).toBe('SWIPE')
-    expect(swipe.state.isTransient).toBe(true)
-  })
-
-  it('does not treat fast closed-hand movement as a swipe', () => {
-    const controller = new GestureController()
-    controller.process(frame(0, createHand('fist', 1, 0)))
-    const movement = controller.process(frame(80, createHand('fist', 1, 0.3)))
-    expect(movement.command.gesture).not.toBe('SWIPE')
+    controller.process(frame(0, createSnapHand(true)))
+    const slowRelease = controller.process(frame(500, createSnapHand(false)))
+    expect(slowRelease.command.gesture).not.toBe('SNAP')
   })
 
   it('resets immediately when tracking is lost', () => {

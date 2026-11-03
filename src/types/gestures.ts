@@ -4,7 +4,7 @@ export type GestureType =
   | 'INDEX_POINT'
   | 'PEACE'
   | 'PINCH'
-  | 'SWIPE'
+  | 'SNAP'
   | 'TWO_HAND_EXPANSION'
   | 'UNKNOWN'
 
@@ -22,7 +22,7 @@ export interface GestureCommand {
 }
 
 export interface GestureClassification {
-  gesture: Exclude<GestureType, 'SWIPE' | 'TWO_HAND_EXPANSION'>
+  gesture: Exclude<GestureType, 'SNAP' | 'TWO_HAND_EXPANSION'>
   heuristicScore: number
   pinchRatio: number
   extendedFingerCount: number
@@ -49,10 +49,10 @@ export interface GestureThresholds {
   flexionAngleDegrees: number
   pinchEnterRatio: number
   pinchExitRatio: number
-  swipeMinimumSpeed: number
-  swipeMinimumDisplacement: number
-  swipeWindowMs: number
-  swipeCooldownMs: number
+  snapContactRatio: number
+  snapReleaseRatio: number
+  snapWindowMs: number
+  snapCooldownMs: number
   confirmationFrames: number
 }
 

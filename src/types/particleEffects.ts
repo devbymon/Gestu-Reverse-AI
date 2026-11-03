@@ -9,7 +9,7 @@ export type FormationType =
   | 'VORTEX'
 
 export type EffectSource = 'GESTURE' | 'MANUAL'
-export type EffectTrigger = 'BURST' | 'DIRECTIONAL_IMPULSE'
+export type EffectTrigger = 'BURST' | 'DIRECTIONAL_IMPULSE' | 'RADIAL_PUSH'
 
 export interface EffectVector {
   x: number

@@ -290,6 +290,14 @@ export class ParticleEngine {
         0.075 + this.currentCommand.intensity * 0.1,
       )
       this.energy = 1
+    } else if (this.currentCommand.trigger === 'RADIAL_PUSH') {
+      applyRadialImpulse(
+        positions,
+        this.velocities,
+        center,
+        0.11 + this.currentCommand.intensity * 0.14,
+      )
+      this.energy = 0.9
     } else if (this.currentCommand.trigger === 'DIRECTIONAL_IMPULSE' && this.currentCommand.direction) {
       applyDirectionalImpulse(
         this.velocities,

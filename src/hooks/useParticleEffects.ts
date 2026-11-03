@@ -16,16 +16,16 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
     if (gestureCommand.timestamp === lastGestureTimestampRef.current) return gestureEffectRef.current
     lastGestureTimestampRef.current = gestureCommand.timestamp
 
-    if (gestureCommand.gesture === 'SWIPE') {
-      if (lastGestureTypeRef.current !== 'SWIPE') triggerIdRef.current += 1
-      lastGestureTypeRef.current = 'SWIPE'
+    if (gestureCommand.gesture === 'SNAP') {
+      if (lastGestureTypeRef.current !== 'SNAP') triggerIdRef.current += 1
+      lastGestureTypeRef.current = 'SNAP'
       gestureEffectRef.current = {
         ...gestureEffectRef.current,
         source: 'GESTURE',
         intensity: gestureCommand.intensity,
         position: gestureCommand.position,
-        direction: gestureCommand.direction,
-        trigger: 'DIRECTIONAL_IMPULSE',
+        direction: undefined,
+        trigger: 'RADIAL_PUSH',
         triggerId: triggerIdRef.current,
         timestamp: gestureCommand.timestamp,
       }

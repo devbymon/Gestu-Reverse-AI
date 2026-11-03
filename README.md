@@ -11,7 +11,7 @@ The particle engine, hand tracking, gesture recognition, and advanced effects re
 - A floating Phase 2-style camera with landmarks, tracking state, and a color-coded gesture stage.
 - A live Gesture Map plus a compact color studio with presets and unrestricted custom colors.
 - Pastel orange landmarks for the left hand and violet landmarks for the right hand.
-- Open-palm swipe detection uses raw palm motion for responsiveness while continuous gesture classification stays smoothed.
+- Finger-snap detection uses the rapid thumb-to-middle-finger release while continuous gesture classification stays smoothed.
 - Live measured FPS, particle count, renderer state, camera state, and MediaPipe state.
 - Launch onboarding, a reusable gesture guide, fullscreen support, and an in-app presentation mode.
 - Keyboard focus states, accessible labels, reduced decorative motion, and desktop/tablet/mobile layouts.
@@ -40,7 +40,7 @@ Then open the local URL printed by Vite.
 4. Add a second hand and confirm that both skeletons are visible with different colors.
 5. Move both hands out of frame and confirm the **No Hands Detected** state.
 6. Exercise each gesture listed below and verify that the gesture label stabilizes before the effect changes.
-7. Swipe once, verify the directional impulse, and confirm it does not repeatedly fire during cooldown.
+7. Touch the thumb and middle finger, release them quickly, verify the push, and confirm it does not repeatedly fire during cooldown.
 8. Exercise the supported gestures and confirm each transition starts from the currently visible positions.
 9. Select **Disable Camera** and confirm that the browser camera indicator turns off.
 10. Open **Colors**, try a preset and custom colors, and confirm particles update without restarting WebGL.
@@ -126,12 +126,12 @@ The MediaPipe module is loaded lazily only after camera permission is granted. I
 | Index Point | Hand-positioned vortex |
 | Peace Sign | Animated 3D particle wave |
 | Pinch | Continuous implosion toward the hand |
-| Hand Swipe | One-shot directional velocity impulse |
+| Finger Snap | One-shot radial particle push |
 | Two-Hand Expansion | High-energy expansion controlled by palm distance |
 
 `GestureCommand` remains independent from MediaPipe. `useParticleEffects()` maps it into a generic `ParticleEffectCommand`, which is the only interaction contract consumed by the renderer. Gestures are the sole formation source.
 
-Priority is Two-Hand Expansion → Swipe → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. Swipe is a transient event; all other gestures are continuous and stabilized before activation.
+Priority is Two-Hand Expansion → Finger Snap → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. Finger Snap is a transient event; all other gestures are continuous and stabilized before activation.
 
 ## Formation mathematics
 

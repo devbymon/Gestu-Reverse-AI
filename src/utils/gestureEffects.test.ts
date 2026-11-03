@@ -11,8 +11,8 @@ describe('gesture effect mapping', () => {
     expect(getGestureFormation('PINCH')).toBe('IMPLOSION')
   })
 
-  it('keeps the underlying candidate visible during a transient swipe', () => {
-    expect(getGestureFormation('SWIPE', 'PEACE')).toBe('WAVE')
+  it('keeps the underlying candidate visible during a transient snap', () => {
+    expect(getGestureFormation('SNAP', 'PEACE')).toBe('WAVE')
   })
 
   it('shows the candidate while a gesture is stabilizing', () => {
