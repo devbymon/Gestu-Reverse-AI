@@ -80,6 +80,18 @@ function createHand(
   }
 }
 
+function createClosedFistWithTouchingThumb(): TrackedHand {
+  const hand = createHand('fist')
+  const landmarks = hand.landmarks.map((landmark) => ({ ...landmark }))
+  const indexTip = landmarks[8]!
+  landmarks[4] = point(indexTip.x - 0.004, indexTip.y + 0.004, indexTip.z)
+  return {
+    ...hand,
+    landmarks,
+    palmPosition: calculatePalmPosition(landmarks),
+  }
+}
+
 function frame(timestamp: number, ...hands: TrackedHand[]): HandTrackingFrame {
   return { timestamp, hands }
 }
@@ -114,6 +126,12 @@ describe('gesture classification', () => {
   it('keeps classification stable at different hand scales', () => {
     expect(classifyHandGesture(createHand('open', 0.55)).gesture).toBe('OPEN_PALM')
     expect(classifyHandGesture(createHand('open', 1.45)).gesture).toBe('OPEN_PALM')
+  })
+
+  it('prioritizes a closed fist when the thumb touches the index finger', () => {
+    const fist = createClosedFistWithTouchingThumb()
+    expect(classifyHandGesture(fist).gesture).toBe('FIST')
+    expect(classifyHandGesture(fist, 'PINCH').gesture).toBe('FIST')
   })
 })
 
