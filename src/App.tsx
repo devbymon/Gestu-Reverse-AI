@@ -27,8 +27,27 @@ const CAMERA_PREVIEW_EFFECT: ParticleEffectCommand = {
   effect: 'WORLD', source: 'GESTURE', intensity: 0.35, triggerId: 0, timestamp: -1,
 }
 
+const CAMERA_REQUESTED_KEY = 'gestu-camera-requested'
+
+function cameraWasRequested(): boolean {
+  try {
+    return window.localStorage.getItem(CAMERA_REQUESTED_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function rememberCameraRequest(): void {
+  try {
+    window.localStorage.setItem(CAMERA_REQUESTED_KEY, 'true')
+  } catch {
+    // Camera permission remains controlled by the browser when storage is unavailable.
+  }
+}
+
 function App() {
   const cameraRef = useRef<CameraPanelHandle>(null)
+  const cameraRestoreAttemptedRef = useRef(false)
   const [performance, setPerformance] = useState<ParticlePerformance | null>(null)
   const [engineError, setEngineError] = useState<string | null>(null)
   const [trackingState, setTrackingState] = useState(INITIAL_TRACKING_STATE)
@@ -49,15 +68,40 @@ function App() {
 
   const handlePerformance = useCallback((metrics: ParticlePerformance) => setPerformance(metrics), [])
   const handleEngineError = useCallback((message: string | null) => setEngineError(message), [])
-  const handleTrackingState = useCallback((state: HandTrackingState) => setTrackingState(state), [])
-  const startCamera = useCallback(() => {
-    dismissWelcome()
-    void cameraRef.current?.enableCamera()
+  const handleTrackingState = useCallback((state: HandTrackingState) => {
+    setTrackingState(state)
+    if (state.status === 'active' || state.status === 'no-hands') dismissWelcome()
   }, [dismissWelcome])
+  const startCamera = useCallback(() => {
+    rememberCameraRequest()
+    void cameraRef.current?.enableCamera()
+  }, [])
 
   const exploreDemo = useCallback(() => {
     dismissWelcome()
   }, [dismissWelcome])
+
+  useEffect(() => {
+    if (cameraRestoreAttemptedRef.current) return
+    cameraRestoreAttemptedRef.current = true
+
+    const restoreCamera = async () => {
+      const permissionState = await (async (): Promise<PermissionState | null> => {
+        try {
+          const permission = await navigator.permissions?.query({ name: 'camera' as PermissionName })
+          return permission?.state ?? null
+        } catch {
+          return null
+        }
+      })()
+
+      const shouldRestore = permissionState === 'granted' ||
+        (cameraWasRequested() && permissionState !== 'denied')
+      if (shouldRestore) void cameraRef.current?.enableCamera()
+    }
+
+    void restoreCamera()
+  }, [])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

@@ -23,7 +23,7 @@
 .particle-orbit::after { content: ''; position: absolute; inset: 13%; border: 1px dashed rgb(155 108 255 / 10%); border-radius: inherit; }
 .particle-error { position: absolute; z-index: 4; inset: 50% auto auto 50%; transform: translate(-50%,-50%); width: min(360px,calc(100% - 40px)); padding: 14px; border: 1px solid rgb(251 113 133 / 35%); background: rgb(15 23 42 / 94%); color: #fda4af; text-align: center; font: 10px/1.5 var(--mono); }
 .viewport-overlay { position: absolute; z-index: 3; top: 28px; right: 36px; display: grid; grid-template-columns: repeat(4,max-content); gap: 28px; pointer-events: none; }
-.viewport-overlay div { display: flex; flex-direction: column; gap: 3px; }
+.viewport-overlay div { display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; }
 .viewport-overlay span { color: var(--muted); font: 9px var(--mono); }
 .viewport-overlay strong { font: 500 11px var(--mono); color: #c9d5e6; }
 .viewport-overlay.is-compact { grid-template-columns: repeat(2,max-content); }
@@ -145,8 +145,8 @@
 .gesture-meter__label { margin-top: 6px; display: flex; justify-content: space-between; }
 .gesture-diagnostics { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
 .gesture-diagnostics__title { color: #94a3b8 !important; font: 7px var(--mono) !important; }
-.gesture-debug { margin: 8px 0 0; color: var(--muted); font: 7px var(--mono); display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-.gesture-debug div { min-width: 0; }
+.gesture-debug { margin: 8px 0 0; color: var(--muted); font: 7px var(--mono); display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+.gesture-debug div { min-width: 0; text-align: center; }
 .gesture-debug dt { margin-bottom: 2px; color: #64748b; }
 .gesture-debug dd { margin: 0; overflow: hidden; color: #9aa7b9; text-overflow: ellipsis; white-space: nowrap; }
 

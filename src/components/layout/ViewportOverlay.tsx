@@ -16,10 +16,13 @@ export default function ViewportOverlay({
   particleCount,
   compact = false,
 }: ViewportOverlayProps) {
+  const gestureLabel = gesture.gesture === 'UNKNOWN'
+    ? 'Not detected'
+    : GESTURE_LABELS[gesture.gesture]
   return (
     <div className={`viewport-overlay ${compact ? 'is-compact' : ''}`} aria-live="polite">
       <div><span>Formation</span><strong>{getEffectPreset(formation).name}</strong></div>
-      <div><span>Gesture</span><strong>{GESTURE_LABELS[gesture.gesture]}</strong></div>
+      <div><span>Gesture</span><strong>{gestureLabel}</strong></div>
       {!compact && <div><span>Control</span><strong>Hand gestures</strong></div>}
       {!compact && <div><span>Particles</span><strong>{particleCount?.toLocaleString() ?? 'N/A'}</strong></div>}
     </div>
