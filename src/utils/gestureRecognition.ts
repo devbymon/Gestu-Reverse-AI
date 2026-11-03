@@ -15,10 +15,10 @@ export const DEFAULT_GESTURE_THRESHOLDS: GestureThresholds = {
   flexionAngleDegrees: 118,
   pinchEnterRatio: 0.38,
   pinchExitRatio: 0.5,
-  swipeMinimumSpeed: 1.25,
-  swipeMinimumDisplacement: 0.11,
-  swipeWindowMs: 130,
-  swipeCooldownMs: 700,
+  swipeMinimumSpeed: 0.8,
+  swipeMinimumDisplacement: 0.075,
+  swipeWindowMs: 200,
+  swipeCooldownMs: 650,
   confirmationFrames: 3,
 }
 

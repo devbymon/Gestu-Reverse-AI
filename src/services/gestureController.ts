@@ -35,7 +35,7 @@ const EFFECT_NAMES: Record<GestureType, string> = {
   UNKNOWN: 'Ambient Sphere',
 }
 
-const SWIPE_VISIBLE_MS = 180
+const SWIPE_VISIBLE_MS = 320
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.min(maximum, Math.max(minimum, value))
@@ -75,10 +75,13 @@ export class GestureController {
       ? 'TWO_HAND_EXPANSION'
       : classifications[0]?.gesture ?? 'UNKNOWN'
     const stabilization = this.stabilizer.update(baseGesture)
-    const swipe = this.findFastestSwipe(hands, frame.timestamp)
+    const swipe = this.findFastestSwipe(frame.hands, frame.timestamp)
+    const swipeEligible = classifications[0]?.gesture === 'OPEN_PALM' ||
+      this.stabilizer.current === 'OPEN_PALM'
 
     if (
       !twoOpenHands &&
+      swipeEligible &&
       swipe &&
       frame.timestamp - this.lastSwipeAt >= this.thresholds.swipeCooldownMs
     ) {

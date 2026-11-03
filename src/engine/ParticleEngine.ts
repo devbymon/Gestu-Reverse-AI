@@ -294,7 +294,7 @@ export class ParticleEngine {
       applyDirectionalImpulse(
         this.velocities,
         this.currentCommand.direction,
-        0.06 + this.currentCommand.intensity * 0.11,
+        0.09 + this.currentCommand.intensity * 0.14,
       )
       this.energy = 0.82
     }

@@ -152,6 +152,22 @@ describe('gesture controller', () => {
     expect(cooldownMotion.command.gesture).not.toBe('SWIPE')
   })
 
+  it('detects a moderate open-palm swipe from unsmoothed palm motion', () => {
+    const controller = new GestureController()
+    controller.process(frame(0, createHand('open', 1, 0)))
+    controller.process(frame(40, createHand('open', 1, 0.04)))
+    const swipe = controller.process(frame(80, createHand('open', 1, 0.08)))
+    expect(swipe.command.gesture).toBe('SWIPE')
+    expect(swipe.state.isTransient).toBe(true)
+  })
+
+  it('does not treat fast closed-hand movement as a swipe', () => {
+    const controller = new GestureController()
+    controller.process(frame(0, createHand('fist', 1, 0)))
+    const movement = controller.process(frame(80, createHand('fist', 1, 0.3)))
+    expect(movement.command.gesture).not.toBe('SWIPE')
+  })
+
   it('resets immediately when tracking is lost', () => {
     const controller = new GestureController()
     expect(stabilize(controller, 'peace')).toBe('PEACE')

@@ -17,7 +17,7 @@
   .app-brand strong { font-size: 13px; }
   .presentation-button { padding: 0 9px; font-size: 0; }
   .presentation-button svg { width: 16px; height: 16px; }
-  .viewport-overlay { left: 18px; bottom: 17px; gap: 7px 20px; }
+  .viewport-overlay { top: 17px; left: 18px; gap: 7px 20px; }
   .viewport-overlay div:nth-child(n+3) { display: none; }
   .particle-viewport::after { inset: 12px; }
   .status-bar { gap: 14px; padding: 0 10px; overflow: hidden; }
@@ -27,10 +27,11 @@
   .welcome-actions { flex-direction: column; }
   .presentation-controls { top: 13px; right: 13px; }
   .presentation-controls button:first-child { display: none; }
-  .gesture-map { top: 12px; left: 12px; width: 185px; padding: 10px; }
+  .gesture-map { right: 12px; bottom: 12px; left: 12px; width: auto; padding: 10px; }
   .gesture-map__heading { margin-bottom: 5px; padding-bottom: 7px; }
   .gesture-map__heading small { display: none; }
-  .gesture-map__row { min-height: 27px; padding: 3px; grid-template-columns: 23px 60px 13px 1fr; }
+  .gesture-map__rows { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 8px; }
+  .gesture-map__row { min-height: 27px; padding: 3px; grid-template-columns: 23px 52px 13px 1fr; }
   .gesture-map__row::before { left: -10px; height: 15px; }
   .gesture-map__row strong, .gesture-map__row > span:last-child { font-size: 8px; }
   .gesture-map__symbol { font-size: 13px; }
