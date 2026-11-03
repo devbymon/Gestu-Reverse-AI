@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
+import type { RefObject } from 'react'
 import { ParticleEngine } from '../engine/ParticleEngine'
 import type { ParticlePerformance } from '../types/particles'
+import type { GestureCommand } from '../types/gestures'
 
-export default function ParticleScene() {
+interface ParticleSceneProps {
+  commandRef: RefObject<GestureCommand>
+}
+
+export default function ParticleScene({ commandRef }: ParticleSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [performance, setPerformance] = useState<ParticlePerformance>({
     fps: 60,
@@ -14,7 +20,7 @@ export default function ParticleScene() {
     const container = containerRef.current
     if (!container) return
 
-    const engine = new ParticleEngine(container, setPerformance)
+    const engine = new ParticleEngine(container, setPerformance, () => commandRef.current)
     const resizeObserver = new ResizeObserver(() => engine.resize())
     const handleVisibility = () => {
       if (document.hidden) engine.stop()
@@ -30,7 +36,7 @@ export default function ParticleScene() {
       document.removeEventListener('visibilitychange', handleVisibility)
       engine.dispose()
     }
-  }, [])
+  }, [commandRef])
 
   return (
     <div className="particle-stage">

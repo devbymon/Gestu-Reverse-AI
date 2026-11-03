@@ -6,6 +6,15 @@ export function createSphereTargets(
   radius: number,
 ): Float32Array {
   const targets = new Float32Array(count * 3)
+  writeSphereTargets(targets, count, radius)
+  return targets
+}
+
+export function writeSphereTargets(
+  targets: Float32Array,
+  count: number,
+  radius: number,
+): void {
 
   for (let index = 0; index < count; index += 1) {
     const normalizedIndex = (index + 0.5) / count
@@ -20,7 +29,76 @@ export function createSphereTargets(
     targets[offset + 2] = Math.sin(angle) * ringRadius * depthVariation
   }
 
-  return targets
+}
+
+export function writeExpandedSphereTargets(
+  targets: Float32Array,
+  count: number,
+  radius: number,
+): void {
+  writeSphereTargets(targets, count, radius)
+  for (let index = 0; index < count; index += 1) {
+    const offset = index * 3
+    const variation = 0.72 + ((index * 53) % 101) / 160
+    targets[offset] *= variation
+    targets[offset + 1] *= variation
+    targets[offset + 2] *= variation
+  }
+}
+
+export function writeVortexTargets(
+  targets: Float32Array,
+  count: number,
+  centerX: number,
+  centerY: number,
+): void {
+  for (let index = 0; index < count; index += 1) {
+    const progress = index / count
+    const angle = progress * Math.PI * 30
+    const radius = 0.22 + progress * 2.25
+    const offset = index * 3
+    targets[offset] = centerX + Math.cos(angle) * radius
+    targets[offset + 1] = centerY + (progress - 0.5) * 5
+    targets[offset + 2] = Math.sin(angle) * radius
+  }
+}
+
+export function writeWaveTargets(
+  targets: Float32Array,
+  count: number,
+  elapsed: number,
+  amplitude: number,
+): void {
+  const side = Math.ceil(Math.sqrt(count))
+  for (let index = 0; index < count; index += 1) {
+    const column = index % side
+    const row = Math.floor(index / side)
+    const x = (column / (side - 1) - 0.5) * 6.2
+    const z = (row / (side - 1) - 0.5) * 6.2
+    const offset = index * 3
+    targets[offset] = x
+    targets[offset + 1] = Math.sin(x * 1.65 + elapsed * 2.1) *
+      Math.cos(z * 1.4 + elapsed * 1.5) * amplitude
+    targets[offset + 2] = z
+  }
+}
+
+export function writeImplosionTargets(
+  targets: Float32Array,
+  count: number,
+  centerX: number,
+  centerY: number,
+  intensity: number,
+): void {
+  const remainingRadius = Math.max(0.025, (1 - intensity) * 0.8)
+  for (let index = 0; index < count; index += 1) {
+    const offset = index * 3
+    const phase = index * GOLDEN_ANGLE
+    const radius = remainingRadius * ((index % 29) / 29)
+    targets[offset] = centerX + Math.cos(phase) * radius
+    targets[offset + 1] = centerY + Math.sin(phase) * radius
+    targets[offset + 2] = Math.sin(phase * 0.7) * radius
+  }
 }
 
 export function createInitialCloud(

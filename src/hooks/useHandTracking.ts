@@ -56,6 +56,8 @@ function waitForVideo(video: HTMLVideoElement): Promise<void> {
 export function useHandTracking(
   videoRef: RefObject<HTMLVideoElement | null>,
   overlayRef: RefObject<HandLandmarkOverlayHandle | null>,
+  onFrame?: (frame: HandTrackingFrame) => void,
+  onReset?: () => void,
 ) {
   const [state, setState] = useState<HandTrackingState>(INITIAL_STATE)
   const latestFrameRef = useRef<HandTrackingFrame | null>(null)
@@ -66,6 +68,10 @@ export function useHandTracking(
   const mountedRef = useRef(true)
   const backendRef = useRef<TrackingBackend | null>(null)
   const resultSignatureRef = useRef('')
+  const onFrameRef = useRef(onFrame)
+  const onResetRef = useRef(onReset)
+  onFrameRef.current = onFrame
+  onResetRef.current = onReset
 
   const stopLoop = useCallback(() => {
     cancelAnimationFrame(animationFrameRef.current)
@@ -94,6 +100,7 @@ export function useHandTracking(
     overlayRef.current?.clear()
     latestFrameRef.current = null
     resultSignatureRef.current = ''
+    onResetRef.current?.()
     if (mountedRef.current) {
       setState({
         ...INITIAL_STATE,
@@ -178,6 +185,7 @@ export function useHandTracking(
           const frame = handTrackingService.detect(video, timestamp)
           latestFrameRef.current = frame
           overlayRef.current?.draw(frame)
+          onFrameRef.current?.(frame)
           const signature = frame.hands.map((hand) => hand.handedness).join('|') || 'none'
           if (signature !== resultSignatureRef.current) {
             resultSignatureRef.current = signature
@@ -205,6 +213,7 @@ export function useHandTracking(
       stopLoop()
       releaseStream()
       overlayRef.current?.clear()
+      onResetRef.current?.()
       setState({
         ...INITIAL_STATE,
         status: 'error',
