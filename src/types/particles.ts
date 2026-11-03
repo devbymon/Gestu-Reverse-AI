@@ -15,6 +15,28 @@ export interface ParticlePerformance {
   quality: 'high' | 'balanced'
 }
 
+export type ParticlePaletteId = 'ULACIT' | 'COSMIC' | 'PLASMA' | 'AURORA' | 'MONOCHROME' | 'NEON_PULSE' | 'CUSTOM'
+
+export interface ParticleSettings {
+  particleCount: number
+  particleSize: number
+  animationSpeed: number
+  interactionSensitivity: number
+  palette: ParticlePaletteId
+  customColors: [string, string, string]
+  revision: number
+}
+
+export const DEFAULT_PARTICLE_SETTINGS: ParticleSettings = {
+  particleCount: 10_000,
+  particleSize: 1,
+  animationSpeed: 1,
+  interactionSensitivity: 1,
+  palette: 'ULACIT',
+  customColors: ['#8b5cf6', '#ffffff', '#ff8a00'],
+  revision: 0,
+}
+
 export const NEUTRAL_PARTICLE_INTERACTION: ParticleInteraction = {
   x: 0,
   y: 0,
