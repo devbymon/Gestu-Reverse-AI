@@ -6,7 +6,7 @@ An immersive React and Three.js experiment for controlling a real-time 3D partic
 
 The particle engine, hand tracking, gesture recognition, and advanced effects remain intact. Phase 5 adds:
 
-- A direct camera-access gate over the already-running spherical particle scene.
+- A single-screen introduction and camera-access panel over the already-running spherical particle scene.
 - Gesture-driven formation selection without competing manual appearance controls.
 - A floating Phase 2-style camera with landmarks, tracking state, and a color-coded gesture stage.
 - A live Gesture Map plus a compact color studio with presets and unrestricted custom colors.

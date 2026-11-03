@@ -37,7 +37,9 @@
   .experience-intro h1 { font-size: clamp(42px,14vw,64px); }
   .experience-orbit { right: -110px; width: 220px; }
   .camera-access { justify-self: stretch; padding: 25px; }
-  .camera-gate { padding: var(--header-height) 18px var(--status-height); justify-content: center; background: rgb(3 5 12 / 58%); }
+  .camera-gate { padding: calc(var(--header-height) + 25px) 18px calc(var(--status-height) + 25px); grid-template-columns: 1fr; align-content: center; gap: 30px; background: rgb(3 5 12 / 58%); }
+  .camera-gate__intro h1 { font-size: clamp(42px,13vw,66px); }
+  .camera-gate__intro p { font-size: 11px; }
   .camera-gate__panel { padding: 25px; }
   .dashboard-app.is-presentation .camera-viewport { height: auto; }
 }
