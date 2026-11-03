@@ -15,10 +15,6 @@ export const DEFAULT_GESTURE_THRESHOLDS: GestureThresholds = {
   flexionAngleDegrees: 118,
   pinchEnterRatio: 0.38,
   pinchExitRatio: 0.5,
-  swipeMinimumSpeed: 1.25,
-  swipeMinimumDisplacement: 0.11,
-  swipeWindowMs: 130,
-  swipeCooldownMs: 700,
   confirmationFrames: 3,
 }
 
@@ -37,8 +33,12 @@ export function classifyHandGesture(
   const pinchThreshold = previousGesture === 'PINCH'
     ? thresholds.pinchExitRatio
     : thresholds.pinchEnterRatio
+  const closedFist = !states.index && flexed >= 3
 
-  if (pinchRatio <= pinchThreshold) {
+  if (closedFist) {
+    return { gesture: 'FIST', heuristicScore: flexed / 4, pinchRatio, extendedFingerCount: extended }
+  }
+  if (pinchRatio <= pinchThreshold && flexed < 3) {
     return {
       gesture: 'PINCH',
       heuristicScore: Math.min(1, 1 - pinchRatio / thresholds.pinchExitRatio),
@@ -54,9 +54,6 @@ export function classifyHandGesture(
   }
   if (extended >= 4) {
     return { gesture: 'OPEN_PALM', heuristicScore: extended / 4, pinchRatio, extendedFingerCount: extended }
-  }
-  if (extended === 0 && flexed >= 3) {
-    return { gesture: 'FIST', heuristicScore: flexed / 4, pinchRatio, extendedFingerCount: extended }
   }
   return { gesture: 'UNKNOWN', heuristicScore: 0, pinchRatio, extendedFingerCount: extended }
 }

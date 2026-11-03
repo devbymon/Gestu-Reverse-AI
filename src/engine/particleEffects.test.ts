@@ -13,6 +13,7 @@ import { normalizedHandToWorld } from '../utils/coordinateMapping'
 import { easeInOutCubic, smoothstep } from '../utils/easing'
 
 const FORMATIONS: FormationType[] = [
+  'WORLD',
   'SPHERE',
   'GALAXY',
   'HEART',
@@ -45,13 +46,16 @@ describe('procedural formations', () => {
     expect(second).toEqual(first)
   })
 
-  it('produces distinct sphere, galaxy, and heart geometry', () => {
+  it('produces distinct world, sphere, galaxy, and heart geometry', () => {
+    const world = new Float32Array(64 * 3)
     const sphere = new Float32Array(64 * 3)
     const galaxy = new Float32Array(64 * 3)
     const heart = new Float32Array(64 * 3)
+    registry.generate('WORLD', world, context(64))
     registry.generate('SPHERE', sphere, context(64))
     registry.generate('GALAXY', galaxy, context(64))
     registry.generate('HEART', heart, context(64))
+    expect(world).not.toEqual(sphere)
     expect(galaxy).not.toEqual(sphere)
     expect(heart).not.toEqual(galaxy)
   })

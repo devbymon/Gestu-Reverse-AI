@@ -80,6 +80,18 @@ function createHand(
   }
 }
 
+function createClosedFistWithTouchingThumb(): TrackedHand {
+  const hand = createHand('fist')
+  const landmarks = hand.landmarks.map((landmark) => ({ ...landmark }))
+  const indexTip = landmarks[8]!
+  landmarks[4] = point(indexTip.x - 0.004, indexTip.y + 0.004, indexTip.z)
+  return {
+    ...hand,
+    landmarks,
+    palmPosition: calculatePalmPosition(landmarks),
+  }
+}
+
 function frame(timestamp: number, ...hands: TrackedHand[]): HandTrackingFrame {
   return { timestamp, hands }
 }
@@ -115,6 +127,12 @@ describe('gesture classification', () => {
     expect(classifyHandGesture(createHand('open', 0.55)).gesture).toBe('OPEN_PALM')
     expect(classifyHandGesture(createHand('open', 1.45)).gesture).toBe('OPEN_PALM')
   })
+
+  it('prioritizes a closed fist when the thumb touches the index finger', () => {
+    const fist = createClosedFistWithTouchingThumb()
+    expect(classifyHandGesture(fist).gesture).toBe('FIST')
+    expect(classifyHandGesture(fist, 'PINCH').gesture).toBe('FIST')
+  })
 })
 
 describe('gesture controller', () => {
@@ -136,20 +154,6 @@ describe('gesture controller', () => {
   it('recognizes two open hands after stabilization', () => {
     const controller = new GestureController()
     expect(stabilize(controller, 'open', 2)).toBe('TWO_HAND_EXPANSION')
-  })
-
-  it('emits one transient swipe and respects its cooldown', () => {
-    const controller = new GestureController()
-    controller.process(frame(0, createHand('open', 1, 0)))
-    controller.process(frame(50, createHand('open', 1, 0.2)))
-    const swipe = controller.process(frame(100, createHand('open', 1, 0.4)))
-    expect(swipe.command.gesture).toBe('SWIPE')
-    expect(swipe.command.direction?.x).toBeLessThan(0)
-    const heldSwipe = controller.process(frame(150, createHand('open', 1, 0.5)))
-    expect(heldSwipe.command.timestamp).toBe(swipe.command.timestamp)
-    controller.process(frame(320, createHand('open', 1, 0)))
-    const cooldownMotion = controller.process(frame(380, createHand('open', 1, 0.45)))
-    expect(cooldownMotion.command.gesture).not.toBe('SWIPE')
   })
 
   it('resets immediately when tracking is lost', () => {

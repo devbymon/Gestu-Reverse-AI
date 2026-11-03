@@ -1,4 +1,5 @@
 export type FormationType =
+  | 'WORLD'
   | 'SPHERE'
   | 'GALAXY'
   | 'HEART'
@@ -52,7 +53,7 @@ export interface EffectPreset {
 }
 
 export const DEFAULT_EFFECT_COMMAND: ParticleEffectCommand = {
-  effect: 'SPHERE',
+  effect: 'WORLD',
   source: 'GESTURE',
   intensity: 0,
   triggerId: 0,

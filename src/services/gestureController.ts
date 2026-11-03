@@ -13,29 +13,15 @@ import {
 } from '../utils/gestureRecognition'
 import { GestureStabilizer, LandmarkSmoother } from '../utils/gestureSmoothing'
 
-interface PalmSample {
-  x: number
-  y: number
-  timestamp: number
-}
-
-interface SwipeMotion {
-  direction: { x: number; y: number }
-  speed: number
-}
-
 const EFFECT_NAMES: Record<GestureType, string> = {
   FIST: 'Compact Sphere',
   OPEN_PALM: 'Controlled Expansion',
   INDEX_POINT: 'Particle Vortex',
   PEACE: 'Particle Wave',
   PINCH: 'Particle Implosion',
-  SWIPE: 'Kinetic Push',
   TWO_HAND_EXPANSION: 'Dual Energy Expansion',
   UNKNOWN: 'Ambient Sphere',
 }
-
-const SWIPE_VISIBLE_MS = 180
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.min(maximum, Math.max(minimum, value))
@@ -44,10 +30,6 @@ function clamp(value: number, minimum = 0, maximum = 1): number {
 export class GestureController {
   private readonly smoother = new LandmarkSmoother()
   private readonly stabilizer: GestureStabilizer
-  private readonly palmHistory = new Map<string, PalmSample[]>()
-  private lastSwipeAt = Number.NEGATIVE_INFINITY
-  private swipeUntil = Number.NEGATIVE_INFINITY
-  private swipeCommand: GestureCommand | null = null
   private readonly thresholds: GestureThresholds
 
   constructor(thresholds: GestureThresholds = DEFAULT_GESTURE_THRESHOLDS) {
@@ -75,38 +57,6 @@ export class GestureController {
       ? 'TWO_HAND_EXPANSION'
       : classifications[0]?.gesture ?? 'UNKNOWN'
     const stabilization = this.stabilizer.update(baseGesture)
-    const swipe = this.findFastestSwipe(hands, frame.timestamp)
-
-    if (
-      !twoOpenHands &&
-      swipe &&
-      frame.timestamp - this.lastSwipeAt >= this.thresholds.swipeCooldownMs
-    ) {
-      this.lastSwipeAt = frame.timestamp
-      this.swipeUntil = frame.timestamp + SWIPE_VISIBLE_MS
-      this.swipeCommand = {
-        gesture: 'SWIPE',
-        intensity: clamp(swipe.speed / 2.5),
-        position,
-        direction: swipe.direction,
-        timestamp: frame.timestamp,
-      }
-      this.palmHistory.clear()
-    }
-
-    if (this.swipeCommand && frame.timestamp <= this.swipeUntil) {
-      return {
-        command: this.swipeCommand,
-        state: this.createState(
-          'SWIPE',
-          stabilization.candidate,
-          this.swipeCommand.intensity,
-          1,
-          hands.length,
-          true,
-        ),
-      }
-    }
 
     const stableGesture = stabilization.stable
     const intensity = this.calculateIntensity(
@@ -137,39 +87,6 @@ export class GestureController {
   reset(): void {
     this.smoother.reset()
     this.stabilizer.reset()
-    this.palmHistory.clear()
-    this.swipeCommand = null
-    this.swipeUntil = Number.NEGATIVE_INFINITY
-    this.lastSwipeAt = Number.NEGATIVE_INFINITY
-  }
-
-  private findFastestSwipe(hands: TrackedHand[], timestamp: number): SwipeMotion | null {
-    let fastest: SwipeMotion | null = null
-    for (const hand of hands) {
-      const key = hand.handedness
-      const history = this.palmHistory.get(key) ?? []
-      history.push({ ...hand.palmPosition, timestamp })
-      const cutoff = timestamp - this.thresholds.swipeWindowMs
-      while (history.length > 0 && (history[0]?.timestamp ?? timestamp) < cutoff) history.shift()
-      this.palmHistory.set(key, history)
-      const first = history[0]
-      const last = history.at(-1)
-      if (!first || !last || last.timestamp <= first.timestamp) continue
-      const x = first.x - last.x
-      const y = first.y - last.y
-      const displacement = Math.hypot(x, y)
-      const speed = displacement / ((last.timestamp - first.timestamp) / 1_000)
-      if (
-        displacement < this.thresholds.swipeMinimumDisplacement ||
-        speed < this.thresholds.swipeMinimumSpeed ||
-        (fastest && speed <= fastest.speed)
-      ) continue
-      fastest = {
-        speed,
-        direction: { x: x / displacement, y: y / displacement },
-      }
-    }
-    return fastest
   }
 
   private calculateIntensity(

@@ -12,6 +12,8 @@ import {
 } from './ParticleForces'
 import { stepParticlePhysics } from './ParticlePhysics'
 import type { ParticlePerformance } from '../types/particles'
+import type { ParticleSettings } from '../types/particles'
+import { DEFAULT_PARTICLE_SETTINGS } from '../types/particles'
 import type {
   FormationContext,
   ParticleEffectCommand,
@@ -19,6 +21,7 @@ import type {
 import { DEFAULT_EFFECT_COMMAND } from '../types/particleEffects'
 import { normalizedHandToWorld } from '../utils/coordinateMapping'
 import { clamp01 } from '../utils/easing'
+import { getParticlePalette } from './ColorPalettes'
 
 const INITIAL_PARTICLE_COUNT = 10_000
 const BALANCED_PARTICLE_COUNT = 7_500
@@ -61,6 +64,7 @@ export class ParticleEngine {
   private readonly container: HTMLElement
   private readonly onPerformance?: (performance: ParticlePerformance) => void
   private readonly getEffectCommand?: () => ParticleEffectCommand
+  private readonly getSettings?: () => ParticleSettings
   private readonly formations = new FormationRegistry()
   private readonly transition = new FormationTransition()
   private readonly uniforms = { uEnergy: { value: 0 } }
@@ -78,6 +82,9 @@ export class ParticleEngine {
   private lastCommandTimestamp = Number.NEGATIVE_INFINITY
   private lastTriggerId = Number.NEGATIVE_INFINITY
   private energy = 0
+  private simulationTime = 0
+  private settings: ParticleSettings = DEFAULT_PARTICLE_SETTINGS
+  private lastSettingsRevision = Number.NEGATIVE_INFINITY
   private contextLost = false
   private quality: ParticlePerformance['quality'] = 'high'
 
@@ -85,10 +92,12 @@ export class ParticleEngine {
     container: HTMLElement,
     onPerformance?: (performance: ParticlePerformance) => void,
     getEffectCommand?: () => ParticleEffectCommand,
+    getSettings?: () => ParticleSettings,
   ) {
     this.container = container
     this.onPerformance = onPerformance
     this.getEffectCommand = getEffectCommand
+    this.getSettings = getSettings
     this.renderer = new THREE.WebGLRenderer({
       antialias: false,
       alpha: true,
@@ -181,7 +190,10 @@ export class ParticleEngine {
   private animate = (): void => {
     this.animationFrame = requestAnimationFrame(this.animate)
     const delta = Math.min(this.clock.getDelta(), 0.05)
-    const elapsed = this.clock.elapsedTime
+    this.consumeSettings()
+    const simulationDelta = delta * this.settings.animationSpeed
+    this.simulationTime += simulationDelta
+    const elapsed = this.simulationTime
     const points = this.points
     if (!points) return
     const positionAttribute = points.geometry.getAttribute('position')
@@ -189,9 +201,9 @@ export class ParticleEngine {
 
     this.consumeCommand(positions, elapsed)
     this.updateFormation(elapsed)
-    this.applyContinuousForces(positions, delta)
+    this.applyContinuousForces(positions, simulationDelta)
     const isImploding = this.currentCommand.effect === 'IMPLOSION'
-    stepParticlePhysics(positions, this.velocities, this.targets, delta, {
+    stepParticlePhysics(positions, this.velocities, this.targets, simulationDelta, {
       spring: isImploding ? 0.052 : 0.034,
       damping: isImploding ? 0.9 : 0.885,
       turbulence: 0.0004 + this.currentCommand.intensity * 0.0012,
@@ -199,10 +211,12 @@ export class ParticleEngine {
     limitVelocities(this.velocities, 0.32)
     positionAttribute.needsUpdate = true
 
-    this.energy = Math.max(0, this.energy - delta * 0.7)
-    this.uniforms.uEnergy.value = this.energy
+    this.energy = Math.max(0, this.energy - simulationDelta * 0.7)
+    this.uniforms.uEnergy.value = this.currentCommand.effect === 'WORLD'
+      ? Math.max(this.energy, 0.72)
+      : this.energy
     const preset = getEffectPreset(this.currentCommand.effect)
-    points.rotation.y += delta * preset.rotationSpeed
+    points.rotation.y += simulationDelta * preset.rotationSpeed
     points.rotation.x = Math.sin(elapsed * 0.2) * 0.08
     const heartbeat = this.currentCommand.effect === 'HEART'
       ? Math.pow(Math.max(0, Math.sin(elapsed * 3.1)), 8) * 0.07
@@ -282,7 +296,7 @@ export class ParticleEngine {
       applyDirectionalImpulse(
         this.velocities,
         this.currentCommand.direction,
-        0.06 + this.currentCommand.intensity * 0.11,
+        0.09 + this.currentCommand.intensity * 0.14,
       )
       this.energy = 0.82
     }
@@ -314,7 +328,9 @@ export class ParticleEngine {
   private sanitizeCommand(command: ParticleEffectCommand): ParticleEffectCommand {
     return {
       ...command,
-      intensity: Number.isFinite(command.intensity) ? clamp01(command.intensity) : 0,
+      intensity: Number.isFinite(command.intensity)
+        ? clamp01(command.intensity * this.settings.interactionSensitivity)
+        : 0,
       position: command.position && Number.isFinite(command.position.x) && Number.isFinite(command.position.y)
         ? command.position
         : undefined,
@@ -328,7 +344,11 @@ export class ParticleEngine {
     const points = this.points
     if (!points) return
     const preset = getEffectPreset(this.currentCommand.effect)
-    const colors = preset.colors.map((color) => new THREE.Color(color))
+    const palette = getParticlePalette(this.settings.palette)
+    const paletteColors = this.settings.palette === 'CUSTOM'
+      ? this.settings.customColors
+      : palette.colors
+    const colors = paletteColors.map((color) => new THREE.Color(color))
     const mixed = new THREE.Color()
     const colorAttribute = points.geometry.getAttribute('aColor') as THREE.BufferAttribute
     const sizeAttribute = points.geometry.getAttribute('aSize') as THREE.BufferAttribute
@@ -336,18 +356,48 @@ export class ParticleEngine {
     const sizeArray = sizeAttribute.array as Float32Array
     for (let index = 0; index < this.particleCount; index += 1) {
       const offset = index * 3
-      const palettePosition = (index % 197) / 196
-      const scaled = palettePosition * (colors.length - 1)
-      const startIndex = Math.floor(scaled)
-      const endIndex = Math.min(colors.length - 1, startIndex + 1)
-      mixed.copy(colors[startIndex]).lerp(colors[endIndex], scaled - startIndex)
+      if (this.currentCommand.effect === 'WORLD') {
+        const colorMix = ((index * 37) % 101) / 100
+        mixed.copy(colors[0]).lerp(colors[1] ?? colors[0], colorMix)
+      } else {
+        const palettePosition = (index % 197) / 196
+        const scaled = palettePosition * (colors.length - 1)
+        const startIndex = Math.floor(scaled)
+        const endIndex = Math.min(colors.length - 1, startIndex + 1)
+        mixed.copy(colors[startIndex]).lerp(colors[endIndex], scaled - startIndex)
+      }
       colorArray[offset] = mixed.r
       colorArray[offset + 1] = mixed.g
       colorArray[offset + 2] = mixed.b
-      sizeArray[index] = (0.072 + ((index * 17) % 23) / 680) * preset.particleSize
+      sizeArray[index] = (0.072 + ((index * 17) % 23) / 680) *
+        preset.particleSize * this.settings.particleSize
     }
     colorAttribute.needsUpdate = true
     sizeAttribute.needsUpdate = true
+  }
+
+  private consumeSettings(): void {
+    const incoming = this.getSettings?.()
+    if (!incoming || incoming.revision === this.lastSettingsRevision) return
+    this.lastSettingsRevision = incoming.revision
+    const nextCount = Math.round(Math.min(15_000, Math.max(3_000, incoming.particleCount)) / 500) * 500
+    const countChanged = nextCount !== this.particleCount
+    const styleChanged = incoming.particleSize !== this.settings.particleSize ||
+      incoming.palette !== this.settings.palette ||
+      incoming.customColors.join() !== this.settings.customColors.join()
+    this.settings = {
+      ...incoming,
+      particleCount: nextCount,
+      particleSize: Math.min(1.8, Math.max(0.6, incoming.particleSize)),
+      animationSpeed: Math.min(1.8, Math.max(0.4, incoming.animationSpeed)),
+      interactionSensitivity: Math.min(1.5, Math.max(0.5, incoming.interactionSensitivity)),
+    }
+    if (countChanged) {
+      this.createParticles(nextCount)
+      this.resize()
+    } else if (styleChanged) {
+      this.updateParticleStyle()
+    }
   }
 
   private samplePerformance(delta: number): void {

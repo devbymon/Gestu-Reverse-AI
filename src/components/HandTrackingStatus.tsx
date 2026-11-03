@@ -9,19 +9,21 @@ const STATUS_LABELS: Record<TrackingStatus, string> = {
   'requesting-permission': 'Requesting Permission',
   initializing: 'Initializing AI',
   active: 'Tracking Active',
-  'no-hands': 'No Hands Detected',
+  'no-hands': 'Camera Ready',
   error: 'Tracking Error',
 }
 
 export default function HandTrackingStatus({ state }: HandTrackingStatusProps) {
   const detail = state.handCount > 0
     ? `${state.handCount} ${state.handCount === 1 ? 'hand' : 'hands'} · ${state.handedness.join(' + ')}`
+    : state.status === 'no-hands'
+      ? 'Show one hand to begin'
     : state.backend
       ? `${state.backend} acceleration`
       : 'On-device vision'
 
   return (
-    <div className="tracking-status" role="status" aria-live="polite">
+    <div className={`tracking-status tracking-status--${state.status}`} role="status" aria-live="polite">
       <span className={`tracking-status__signal tracking-status__signal--${state.status}`} />
       <div>
         <strong>{STATUS_LABELS[state.status]}</strong>

@@ -1,0 +1,47 @@
+@media (max-width: 1100px) {
+  .header-status span:nth-child(2) { display: none; }
+  .hero-copy { left: 36px; }
+}
+
+@media (max-width: 700px) {
+  :root { --header-height: 58px; --status-height: 31px; }
+  .app-header { gap: 9px; padding: 0 10px; }
+  .app-brand { min-width: 0; flex: 1; }
+  .app-brand > div:last-child > span, .brand-mark, .header-status, .header-actions > .icon-button { display: none; }
+  .app-brand strong { font-size: 13px; }
+  .viewport-overlay { display: none; }
+  .viewport-overlay div:nth-child(n+3) { display: none; }
+  .particle-viewport::after { inset: 12px; }
+  .status-bar { gap: 14px; padding: 0 10px; overflow: hidden; }
+  .status-bar span:nth-child(4), .status-bar span:nth-child(5), .status-bar__privacy { display: none; }
+  .welcome-dialog { padding: 35px 24px 26px; }
+  .welcome-orbit { display: none; }
+  .welcome-actions { flex-direction: column; }
+  .presentation-controls { top: 13px; right: 13px; }
+  .presentation-controls button:first-child { display: none; }
+  .hero-copy { top: 24px; left: 20px; width: calc(100% - 40px); transform: none; }
+  .hero-copy h1 { margin: 8px 0; font-size: 38px; }
+  .hero-copy p, .hero-index { display: none; }
+  .camera-panel { right: 12px; bottom: 12px; width: min(300px,calc(100% - 24px)); max-height: 62%; padding: 13px; }
+  .gesture-map { top: 58px; right: 12px; bottom: auto; left: 12px; width: auto; padding: 10px; }
+  .gesture-map__rows { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px 8px; }
+  .gesture-map__row { grid-template-columns: 24px 52px 13px 1fr; }
+  .color-dock { top: 12px; left: 12px; }
+  .color-dock__toggle span { display: none; }
+  .color-studio { width: min(280px,calc(100vw - 24px)); }
+  .experience-gate, .experience-gate.is-camera-step { min-height: 100%; padding: 70px 24px 35px; grid-template-columns: 1fr; align-content: center; }
+  .experience-gate.is-camera-step { gap: 34px; }
+  .is-camera-step .experience-intro { transform: none; }
+  .experience-intro h1 { font-size: clamp(42px,14vw,64px); }
+  .experience-orbit { right: -110px; width: 220px; }
+  .camera-access { justify-self: stretch; padding: 25px; }
+  .camera-gate { padding: calc(var(--header-height) + 25px) 18px calc(var(--status-height) + 25px); grid-template-columns: 1fr; align-content: center; gap: 30px; background: rgb(3 5 12 / 58%); }
+  .camera-gate__intro h1 { font-size: clamp(42px,13vw,66px); }
+  .camera-gate__intro p { font-size: 11px; }
+  .camera-gate__panel { padding: 25px; }
+  .dashboard-app.is-presentation .camera-viewport { height: auto; }
+}
+
+@media (max-height: 650px) and (min-width: 701px) {
+  .camera-panel { width: 300px; max-height: calc(100% - 24px); }
+}
