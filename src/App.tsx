@@ -1,5 +1,6 @@
 
 import ParticleScene from './components/ParticleScene'
+import CameraPreview from './components/CameraPreview'
 import './App.css'
 
 function App() {
@@ -11,23 +12,24 @@ function App() {
           <span className="eyebrow">GESTURAL PARTICLE LAB</span>
           <h1>Gestu Reverse <em>AI</em></h1>
         </div>
-        <span className="phase-label">PHASE 01 / ENGINE</span>
+        <span className="phase-label">PHASE 02 / AI VISION</span>
       </header>
 
       <section className="scene">
         <ParticleScene />
         <div className="hero-copy">
-          <span className="hero-index">01 — PARTICLE ENGINE</span>
-          <h2>A universe<br />waiting for <i>you.</i></h2>
+          <span className="hero-index">VISION SYSTEM ONLINE</span>
+          <h2>See motion.<br />Understand <i>intent.</i></h2>
           <p>
-            Ten thousand points of light, suspended in motion and prepared
-            for real-time gestural input.
+            On-device hand tracking identifies 21 landmarks per hand while
+            the particle engine remains fluid and independent.
           </p>
         </div>
+        <CameraPreview />
       </section>
 
       <footer className="footer">
-        <span>THREE.JS / WEBGL</span>
+        <span>THREE.JS + MEDIAPIPE</span>
         <span className="footer-status"><i /> SYSTEM ONLINE</span>
         <span>LOCAL PROCESSING</span>
       </footer>
