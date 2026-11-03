@@ -14,7 +14,6 @@ export default function WelcomeDialog({ open, onStartCamera, onContinueWithoutCa
         <span className="dialog-kicker">Gestu Reverse AI · Interactive particle system</span>
         <h1 id="welcome-title">A universe<br />waiting for <em>you.</em></h1>
         <p>An AI-powered particle universe that translates local hand gestures into formations, motion, and light—directly in your browser.</p>
-        <span className="camera-gate__motto">World class. Our class.</span>
       </section>
       <section className="camera-gate__panel">
         <span className="camera-access__icon"><Icon name="camera" size={22} /></span>
