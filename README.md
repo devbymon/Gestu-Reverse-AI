@@ -1,75 +1,80 @@
-# React + TypeScript + Vite
+# Gestu Reverse AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An immersive React and Three.js experiment for controlling a real-time 3D particle system with hand gestures. The project is being delivered in independent, verifiable phases.
 
-Currently, two official plugins are available:
+## Current status: Phase 1 — Particle Engine
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The current build includes:
 
-## React Compiler
+- 10,000 particles arranged on an even Fibonacci sphere.
+- Custom GLSL point sprites with a soft core and additive glow.
+- Cyan, electric-blue, and violet particle palette.
+- Frame-rate-independent spring physics for smooth formation transitions.
+- Ambient rotation, pulse, camera parallax, and micro-turbulence.
+- Automatic balanced mode (7,500 particles and reduced pixel ratio) after sustained low performance.
+- A typed `ParticleInteraction` input ready for future hand-tracking data.
+- Pause/resume when the tab visibility changes.
+- Full Three.js geometry, material, renderer, animation-frame, and WebGL context cleanup.
+- Responsive interface and live FPS/particle-quality indicators.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Camera access, MediaPipe, gesture classification, and advanced formations are intentionally outside Phase 1.
 
-## Expanding the ESLint configuration
+## Requirements
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 20.19+ or 22.12+ (required by Vite 8)
+- A modern browser with WebGL support
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Local development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Then open the local URL printed by Vite.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Verification
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run lint
+npm run build
 ```
+
+## Architecture
+
+```text
+src/
+├── components/
+│   └── ParticleScene.tsx       React lifecycle and performance overlay
+├── engine/
+│   ├── ParticleEngine.ts       Three.js renderer and animation orchestration
+│   ├── ParticleFormations.ts   Reusable particle target generation
+│   └── ParticlePhysics.ts      Spring/damping simulation
+├── types/
+│   └── particles.ts            Interaction and performance contracts
+├── App.tsx
+└── App.css
+```
+
+The render loop lives outside React state. React receives only a performance sample approximately once per second, avoiding component updates on every frame.
+
+## Interaction contract
+
+`ParticleEngine.setInteraction()` accepts normalized position, expansion, and motion energy. Phase 2 and Phase 3 can feed smoothed MediaPipe output into this contract without coupling camera logic to WebGL rendering.
+
+## Dependencies
+
+- `react` / `react-dom`: interface and lifecycle.
+- `three`: WebGL rendering, buffers, shaders, and camera math.
+- Vite, TypeScript, and ESLint: development, compilation, and static checks.
+
+No camera data is captured or transmitted in the current phase.
+
+## Roadmap
+
+1. **Particle Engine** — current phase.
+2. **Hand Tracking** — explicit camera permission and MediaPipe Hand Landmarker.
+3. **Gesture Recognition** — robust landmark geometry, smoothing, and hysteresis.
+4. **Advanced Visual Effects** — galaxy, heart, spiral, wave, burst, and implosion.
+5. **UI/UX Dashboard** — controls, preview, gesture state, and demo mode.
+6. **Testing & Optimization** — cross-browser validation, profiling, and security review.
