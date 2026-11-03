@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useRef,
 } from 'react'
@@ -17,6 +18,10 @@ const HAND_COLORS = {
   Right: '#a855f7',
   Unknown: '#2563eb',
 } as const
+
+interface HandLandmarkOverlayProps {
+  visible?: boolean
+}
 
 function resizeCanvas(canvas: HTMLCanvasElement): CanvasRenderingContext2D | null {
   const context = canvas.getContext('2d')
@@ -89,8 +94,8 @@ function drawHand(
   context.fillText(label, labelX + 7, labelY)
 }
 
-const HandLandmarkOverlay = forwardRef<HandLandmarkOverlayHandle>(
-  function HandLandmarkOverlay(_, forwardedRef) {
+const HandLandmarkOverlay = forwardRef<HandLandmarkOverlayHandle, HandLandmarkOverlayProps>(
+  function HandLandmarkOverlay({ visible = true }, forwardedRef) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const clear = useCallback(() => {
@@ -100,6 +105,7 @@ const HandLandmarkOverlay = forwardRef<HandLandmarkOverlayHandle>(
     }, [])
 
     const draw = useCallback((frame: HandTrackingFrame) => {
+      if (!visible) return
       const canvas = canvasRef.current
       if (!canvas) return
       const context = resizeCanvas(canvas)
@@ -108,11 +114,22 @@ const HandLandmarkOverlay = forwardRef<HandLandmarkOverlayHandle>(
       const height = canvas.clientHeight
       context.clearRect(0, 0, width, height)
       frame.hands.forEach((hand) => drawHand(context, hand, width, height))
-    }, [])
+    }, [visible])
+
+    useEffect(() => {
+      if (!visible) clear()
+    }, [clear, visible])
 
     useImperativeHandle(forwardedRef, () => ({ draw, clear }), [clear, draw])
 
-    return <canvas ref={canvasRef} className="landmark-overlay" aria-hidden="true" />
+    return (
+      <canvas
+        ref={canvasRef}
+        className="landmark-overlay"
+        aria-hidden="true"
+        hidden={!visible}
+      />
+    )
   },
 )
 

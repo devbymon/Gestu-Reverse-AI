@@ -1,19 +1,9 @@
-import type { GestureRecognitionState, GestureType } from '../types/gestures'
+import type { GestureRecognitionState } from '../types/gestures'
+import { GESTURE_LABELS } from '../utils/gestureLabels'
 import GestureDebugPanel from './GestureDebugPanel'
 
 interface GestureIndicatorProps {
   state: GestureRecognitionState
-}
-
-const GESTURE_LABELS: Record<GestureType, string> = {
-  FIST: 'Closed Fist',
-  OPEN_PALM: 'Open Palm',
-  INDEX_POINT: 'Index Point',
-  PEACE: 'Peace Sign',
-  PINCH: 'Pinch',
-  SWIPE: 'Hand Swipe',
-  TWO_HAND_EXPANSION: 'Two-Hand Expansion',
-  UNKNOWN: 'No Gesture Detected',
 }
 
 export default function GestureIndicator({ state }: GestureIndicatorProps) {

@@ -1,0 +1,37 @@
+@media (max-width: 1100px) {
+  .sidebar-toggle { display: inline-grid; }
+  .header-status span:nth-child(2) { display: none; }
+  .dashboard-shell { grid-template-columns: 1fr; }
+  .app-sidebar { position: absolute; inset: 0 0 0 auto; width: min(var(--sidebar-width),calc(100% - 50px)); transform: translateX(105%); transition: transform .22s ease; box-shadow: -25px 0 70px rgb(0 0 0 / 50%); }
+  .app-sidebar.is-open { transform: translateX(0); }
+  .sidebar-heading .icon-button { display: inline-grid; }
+  .sidebar-backdrop { position: absolute; z-index: 15; inset: 0; display: block; border: 0; background: rgb(2 4 10 / 62%); }
+}
+
+@media (max-width: 700px) {
+  :root { --header-height: 58px; --status-height: 31px; }
+  .app-header { gap: 9px; padding: 0 10px; }
+  .app-brand { min-width: 0; flex: 1; }
+  .app-brand > div:last-child > span, .brand-mark, .header-status, .header-actions > .icon-button { display: none; }
+  .app-brand strong { font-size: 13px; }
+  .presentation-button { padding: 0 9px; font-size: 0; }
+  .presentation-button svg { width: 16px; height: 16px; }
+  .viewport-overlay { left: 18px; bottom: 17px; gap: 7px 20px; }
+  .viewport-overlay div:nth-child(n+3) { display: none; }
+  .particle-viewport::after { inset: 12px; }
+  .status-bar { gap: 14px; padding: 0 10px; overflow: hidden; }
+  .status-bar span:nth-child(4), .status-bar span:nth-child(5), .status-bar__privacy { display: none; }
+  .welcome-dialog { padding: 35px 24px 26px; }
+  .welcome-orbit { display: none; }
+  .welcome-actions { flex-direction: column; }
+  .formation-grid { grid-template-columns: repeat(4,1fr); }
+  .presentation-controls { top: 13px; right: 13px; }
+  .presentation-controls button:first-child { display: none; }
+  .dashboard-app.is-presentation .app-sidebar { right: 13px; bottom: 13px; width: min(260px,calc(100% - 26px)); max-height: 245px; overflow-y: auto; }
+  .dashboard-app.is-presentation .camera-viewport { height: 92px; }
+}
+
+@media (max-height: 650px) and (min-width: 701px) {
+  .control-section { padding-top: 12px; padding-bottom: 12px; }
+  .camera-viewport { height: 110px; }
+}

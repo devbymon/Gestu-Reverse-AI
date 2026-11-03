@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import type { GestureCommand, GestureType } from '../types/gestures'
 import type {
@@ -17,10 +17,15 @@ const GESTURE_EFFECTS: Record<Exclude<GestureType, 'SWIPE'>, FormationType> = {
   UNKNOWN: 'SPHERE',
 }
 
-export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>) {
+export function useParticleEffects(
+  gestureCommandRef: RefObject<GestureCommand>,
+  gestureType: GestureType,
+) {
   const [manualMode, setManualMode] = useState(false)
   const [selectedEffect, setSelectedEffect] = useState<FormationType>('SPHERE')
   const manualModeRef = useRef(false)
+  const selectedEffectRef = useRef<FormationType>('SPHERE')
+  const burstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const manualCommandRef = useRef<ParticleEffectCommand>({
     ...DEFAULT_EFFECT_COMMAND,
     source: 'MANUAL',
@@ -31,9 +36,13 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
   const triggerIdRef = useRef(0)
 
   const selectEffect = useCallback((effect: FormationType) => {
+    if (burstTimerRef.current) clearTimeout(burstTimerRef.current)
     manualModeRef.current = true
     setManualMode(true)
-    setSelectedEffect(effect)
+    if (effect !== 'ENERGY_BURST') {
+      selectedEffectRef.current = effect
+      setSelectedEffect(effect)
+    }
     triggerIdRef.current += 1
     manualCommandRef.current = {
       effect,
@@ -43,6 +52,22 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
       triggerId: triggerIdRef.current,
       timestamp: performance.now(),
     }
+    if (effect === 'ENERGY_BURST') {
+      burstTimerRef.current = setTimeout(() => {
+        triggerIdRef.current += 1
+        manualCommandRef.current = {
+          effect: selectedEffectRef.current,
+          source: 'MANUAL',
+          intensity: 0.85,
+          triggerId: triggerIdRef.current,
+          timestamp: performance.now(),
+        }
+      }, 900)
+    }
+  }, [])
+
+  useEffect(() => () => {
+    if (burstTimerRef.current) clearTimeout(burstTimerRef.current)
   }, [])
 
   const resetSphere = useCallback(() => selectEffect('SPHERE'), [selectEffect])
@@ -50,6 +75,11 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
   const enableGestureControl = useCallback(() => {
     manualModeRef.current = false
     setManualMode(false)
+  }, [])
+
+  const enableManualControl = useCallback(() => {
+    manualModeRef.current = true
+    setManualMode(true)
   }, [])
 
   const getEffectCommand = useCallback((): ParticleEffectCommand => {
@@ -96,9 +126,13 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
   return {
     manualMode,
     selectedEffect,
+    activeEffect: manualMode || gestureType === 'SWIPE'
+      ? selectedEffect
+      : GESTURE_EFFECTS[gestureType],
     selectEffect,
     resetSphere,
     enableGestureControl,
+    enableManualControl,
     getEffectCommand,
   }
 }

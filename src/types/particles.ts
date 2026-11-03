@@ -15,6 +15,26 @@ export interface ParticlePerformance {
   quality: 'high' | 'balanced'
 }
 
+export type ParticlePaletteId = 'COSMIC' | 'PLASMA' | 'AURORA' | 'MONOCHROME'
+
+export interface ParticleSettings {
+  particleCount: number
+  particleSize: number
+  animationSpeed: number
+  interactionSensitivity: number
+  palette: ParticlePaletteId
+  revision: number
+}
+
+export const DEFAULT_PARTICLE_SETTINGS: ParticleSettings = {
+  particleCount: 10_000,
+  particleSize: 1,
+  animationSpeed: 1,
+  interactionSensitivity: 1,
+  palette: 'COSMIC',
+  revision: 0,
+}
+
 export const NEUTRAL_PARTICLE_INTERACTION: ParticleInteraction = {
   x: 0,
   y: 0,
