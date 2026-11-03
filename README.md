@@ -2,20 +2,21 @@
 
 An immersive React and Three.js experiment for controlling a real-time 3D particle system with hand gestures. The project is being delivered in independent, verifiable phases.
 
-## Current status: Phase 3 — Gesture Recognition & Particle Interaction
+## Current status: Phase 4 — Advanced Visual Effects & Particle Physics
 
-The particle engine and hand-tracking system remain intact. Phase 3 adds:
+The particle engine, hand tracking, and gesture recognition remain intact. Phase 4 adds:
 
-- Orientation- and scale-aware finger classification using joint angles and relative distances.
-- Closed Fist, Open Palm, Index Point, Peace Sign, Pinch, Hand Swipe, and Two-Hand Expansion.
-- Exponential landmark smoothing, three-frame confirmation, pinch hysteresis, and swipe cooldown.
-- A decoupled `GestureCommand` contract between computer vision and Three.js.
-- Compact sphere, controlled expansion, vortex, wave, implosion, and directional impulse effects.
-- A live gesture panel showing effect, interaction intensity, candidate, and stabilization state.
-- Immediate reset when hand tracking is lost, while the ambient particle animation continues.
-- Synthetic unit tests for classification, scale invariance, transitions, swipe, cooldown, and tracking loss.
+- Eight procedural formations: Sphere, Galaxy, Heart, Spiral, Wave, Energy Burst, Implosion, and Vortex.
+- Interruptible, eased transitions captured from current visual particle positions.
+- Lightweight radial, directional, orbital, repulsion, spring, and damping forces.
+- Effect-specific palettes, particle sizes, rotation, glow energy, heart beat, and sphere pulse.
+- Consistent mirrored hand-to-world coordinate mapping with finite input validation.
+- A manual demo mode that works without camera access and explicitly overrides gesture commands.
+- Reusable presets and a registry that supports adding formations without changing the renderer.
+- WebGL context-loss handling and the existing one-way adaptive quality fallback.
+- Automated validation for all formations, transitions, easing, forces, mapping, and gestures.
 
-Advanced Phase 4 formations and the full Phase 5 dashboard are intentionally not included.
+The full Phase 5 dashboard is intentionally not included; Phase 4 provides only compact demo controls.
 
 ## Requirements
 
@@ -41,7 +42,10 @@ Then open the local URL printed by Vite.
 5. Move both hands out of frame and confirm the **No Hands Detected** state.
 6. Exercise each gesture listed below and verify that the gesture label stabilizes before the effect changes.
 7. Swipe once, verify the directional impulse, and confirm it does not repeatedly fire during cooldown.
-8. Select **Disable Camera** and confirm that the browser camera indicator turns off.
+8. Use **Demo Mode** to select each of the eight effects, including Burst and Implosion.
+9. Change effects rapidly and confirm each transition starts from the currently visible positions.
+10. Select **Reset Sphere**, then **Gesture Control** to return priority to camera gestures.
+11. Select **Disable Camera** and confirm that the browser camera indicator turns off.
 
 Physical camera and one/two-hand detection must be validated manually because they require a real camera and browser permission.
 
@@ -59,17 +63,32 @@ npm test
 src/
 ├── components/
 │   ├── CameraPreview.tsx        Camera panel and explicit controls
+│   ├── DemoControls.tsx         Minimal no-camera effect selection
 │   ├── GestureIndicator.tsx     Stable gesture and active-effect display
 │   ├── GestureDebugPanel.tsx    Candidate and interaction diagnostics
 │   ├── HandLandmarkOverlay.tsx Canvas 2D hand skeleton rendering
 │   ├── HandTrackingStatus.tsx  Model and tracking status
 │   └── ParticleScene.tsx       Particle lifecycle and performance overlay
 ├── engine/
-│   ├── ParticleEngine.ts       Three.js renderer and animation orchestration
-│   ├── ParticleFormations.ts   Reusable particle target generation
-│   └── ParticlePhysics.ts      Spring/damping simulation
+│   ├── EffectPresets.ts         Visual and transition configurations
+│   ├── FormationRegistry.ts     Extensible formation lookup
+│   ├── FormationTransition.ts   Interruptible eased interpolation
+│   ├── ParticleEngine.ts        Three.js rendering and effect orchestration
+│   ├── ParticleForces.ts        Bounded procedural forces
+│   ├── ParticleFormations.ts    Deterministic startup distribution
+│   └── ParticlePhysics.ts       Spring/damping simulation
+├── formations/
+│   ├── SphereFormation.ts       Volumetric Fibonacci sphere
+│   ├── GalaxyFormation.ts       Four-arm 3D galaxy
+│   ├── HeartFormation.ts        Parametric volumetric heart
+│   ├── SpiralFormation.ts       Configurable helix
+│   ├── WaveFormation.ts         Dynamic sine/cosine field
+│   ├── BurstFormation.ts        Radial supernova targets
+│   ├── ImplosionFormation.ts    Stable point attraction
+│   └── VortexFormation.ts       Three-dimensional funnel
 ├── hooks/
 │   ├── useGestureRecognition.ts Gesture controller bridge and UI throttling
+│   ├── useParticleEffects.ts    Manual/gesture priority and effect commands
 │   └── useHandTracking.ts       Camera and inference lifecycle
 ├── services/
 │   ├── gestureController.ts     Temporal classification and command generation
@@ -77,8 +96,11 @@ src/
 ├── types/
 │   ├── gestures.ts              Gesture, command, and UI contracts
 │   ├── handTracking.ts          Tracking contracts
+│   ├── particleEffects.ts       Formations, presets, and engine commands
 │   └── particles.ts            Interaction and performance contracts
 ├── utils/
+│   ├── coordinateMapping.ts     Normalized camera-to-world mapping
+│   ├── easing.ts                Clamped transition curves
 │   ├── gestureGeometry.ts       Angles, hand scale, finger and pinch geometry
 │   ├── gestureRecognition.ts    Pure single-hand classification
 │   ├── gestureSmoothing.ts      Landmark smoothing and gesture stabilization
@@ -101,9 +123,25 @@ The MediaPipe module is loaded lazily only after camera permission is granted. I
 | Hand Swipe | One-shot directional velocity impulse |
 | Two-Hand Expansion | High-energy expansion controlled by palm distance |
 
-`GestureCommand` contains only gesture, intensity, normalized position/direction, and timestamp. The particle engine never imports MediaPipe types and consumes commands independently from the 30 FPS inference cadence.
+`GestureCommand` remains independent from MediaPipe. `useParticleEffects()` maps it into a generic `ParticleEffectCommand`, which is the only interaction contract consumed by the renderer. The manual source has explicit priority while Demo Mode is active; selecting **Gesture Control** restores the gesture source.
 
 Priority is Two-Hand Expansion → Swipe → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. Swipe is a transient event; all other gestures are continuous and stabilized before activation.
+
+## Formation mathematics
+
+- **Sphere:** Fibonacci directions with cube-root radial sampling for volumetric density.
+- **Galaxy:** four logarithmic-style arms, deterministic jitter, dense core, and vertical depth.
+- **Heart:** the classic parametric heart curve with deterministic radial fill and Z thickness.
+- **Spiral/Vortex:** helical equations with progressive radius, height, and orbital force.
+- **Wave:** organized grid with animated sine/cosine displacement and per-particle variation.
+- **Burst:** deterministic spherical directions combined with a one-shot radial velocity impulse.
+- **Implosion:** bounded attraction targets around a movable hand-controlled center.
+
+Transitions snapshot the current particle positions once, interpolate toward stable destination buffers with cubic easing, and can be interrupted without resetting geometry. Dynamic formations update their reused destination buffer only when needed.
+
+## Manual demo mode
+
+The application starts in gesture-priority mode. Selecting any preset enables manual priority, so camera gestures cannot compete with the selected effect. **Reset Sphere** restores the resting formation while keeping manual control; **Gesture Control** returns authority to recognized gestures. The camera is optional for all manual effects.
 
 ## MediaPipe assets
 
@@ -127,7 +165,7 @@ The checked-in model and WASM files allow the tracking runtime to load without a
 
 1. **Particle Engine** — complete.
 2. **Hand Tracking** — complete.
-3. **Gesture Recognition** — current phase.
-4. **Advanced Visual Effects** — galaxy, heart, spiral, wave, burst, and implosion.
+3. **Gesture Recognition** — complete.
+4. **Advanced Visual Effects** — current phase.
 5. **UI/UX Dashboard** — controls, preview, gesture state, and demo mode.
 6. **Testing & Optimization** — cross-browser validation, profiling, and security review.
