@@ -29,7 +29,7 @@ export default function ParticleScene({
       engine = new ParticleEngine(container, onPerformance, getEffectCommand, getSettings)
     } catch {
       const errorTimer = window.setTimeout(() => {
-        setEngineError('WebGL is unavailable. Manual controls and camera tracking remain accessible.')
+        setEngineError('WebGL is unavailable. Camera tracking and appearance settings remain accessible.')
         onEngineError('WebGL unavailable')
       }, 0)
       return () => window.clearTimeout(errorTimer)

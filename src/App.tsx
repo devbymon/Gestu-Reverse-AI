@@ -12,9 +12,9 @@ import { useDashboardState } from './hooks/useDashboardState'
 import { useGestureRecognition } from './hooks/useGestureRecognition'
 import { useParticleEffects } from './hooks/useParticleEffects'
 import { usePresentationMode } from './hooks/usePresentationMode'
-import type { InteractionMode } from './types/dashboard'
 import type { HandTrackingState } from './types/handTracking'
 import type { ParticlePerformance } from './types/particles'
+import { getGestureFormation } from './utils/gestureEffects'
 import './App.css'
 
 const INITIAL_TRACKING_STATE: HandTrackingState = {
@@ -29,37 +29,31 @@ function App() {
   const dashboard = useDashboardState()
   const presentation = usePresentationMode()
   const gestureRecognition = useGestureRecognition()
-  const particleEffects = useParticleEffects(gestureRecognition.commandRef, gestureRecognition.state.gesture)
-  const mode: InteractionMode = particleEffects.manualMode ? 'MANUAL' : 'AI'
+  const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
+  const particleEffects = useParticleEffects(commandRef)
+  const activeEffect = getGestureFormation(gestureState.gesture, gestureState.candidate)
   const { settings, visibility, updateSettings, resetSettings, getSettings, setVisible, dismissWelcome } = dashboard
   const { presentationMode, requestFullscreen, enterPresentation, exitPresentation } = presentation
-  const { activeEffect, enableGestureControl, enableManualControl, resetSphere, selectEffect, getEffectCommand } = particleEffects
+  const { getEffectCommand } = particleEffects
 
   const handlePerformance = useCallback((metrics: ParticlePerformance) => setPerformance(metrics), [])
   const handleEngineError = useCallback((message: string | null) => setEngineError(message), [])
   const handleTrackingState = useCallback((state: HandTrackingState) => setTrackingState(state), [])
   const closeSidebar = useCallback(() => setVisible('sidebar', false), [setVisible])
 
-  const handleModeChange = useCallback((nextMode: InteractionMode) => {
-    if (nextMode === 'AI') enableGestureControl()
-    else enableManualControl()
-  }, [enableGestureControl, enableManualControl])
-
   const handleReset = useCallback(() => {
     resetSettings()
-    resetSphere()
-  }, [resetSettings, resetSphere])
+    resetGestures()
+  }, [resetGestures, resetSettings])
 
   const startCamera = useCallback(() => {
     dismissWelcome()
-    enableGestureControl()
     void cameraRef.current?.enableCamera()
-  }, [dismissWelcome, enableGestureControl])
+  }, [dismissWelcome])
 
   const exploreDemo = useCallback(() => {
     dismissWelcome()
-    selectEffect('SPHERE')
-  }, [dismissWelcome, selectEffect])
+  }, [dismissWelcome])
 
   const togglePresentation = useCallback(() => {
     if (presentationMode) void exitPresentation()
@@ -77,7 +71,7 @@ function App() {
   return (
     <main className={`dashboard-app ${presentationMode ? 'is-presentation' : ''}`}>
       <AppHeader
-        mode={mode} cameraStatus={trackingState.status} presentationMode={presentationMode}
+        cameraStatus={trackingState.status} presentationMode={presentationMode}
         onMenu={() => setVisible('sidebar', !visibility.sidebar)}
         onHelp={() => setVisible('help', true)}
         onFullscreen={() => void requestFullscreen()}
@@ -90,7 +84,7 @@ function App() {
             onPerformance={handlePerformance} onEngineError={handleEngineError}
           />
           <ViewportOverlay
-            formation={activeEffect} gesture={gestureRecognition.state} mode={mode}
+            formation={activeEffect} gesture={gestureState}
             particleCount={performance?.particleCount ?? null} compact={presentationMode}
           />
           {presentationMode && (
@@ -102,19 +96,18 @@ function App() {
         </section>
         {visibility.sidebar && <button className="sidebar-backdrop" type="button" aria-label="Close controls" onClick={closeSidebar} />}
         <AppSidebar
-          open={visibility.sidebar} cameraRef={cameraRef} mode={mode}
-          activeEffect={activeEffect} settings={settings}
-          gestureState={gestureRecognition.state} trackingState={trackingState}
+          open={visibility.sidebar} cameraRef={cameraRef} settings={settings}
+          gestureState={gestureState}
           showPreview={visibility.cameraPreview} showLandmarks={visibility.landmarks}
-          onClose={closeSidebar} onModeChange={handleModeChange} onSelectEffect={selectEffect}
+          onClose={closeSidebar}
           onSettingsChange={updateSettings} onReset={handleReset}
           onPreviewChange={(visible) => setVisible('cameraPreview', visible)}
           onLandmarksChange={(visible) => setVisible('landmarks', visible)}
-          onTrackingFrame={gestureRecognition.processFrame} onTrackingReset={gestureRecognition.reset}
+          onTrackingFrame={processFrame} onTrackingReset={resetGestures}
           onTrackingState={handleTrackingState}
         />
       </div>
-      <StatusBar performance={performance} mode={mode} tracking={trackingState} engineError={engineError} />
+      <StatusBar performance={performance} tracking={trackingState} engineError={engineError} />
       <WelcomeDialog open={visibility.welcome} onStartCamera={startCamera} onExploreDemo={exploreDemo} onClose={dismissWelcome} />
       <HelpPanel open={visibility.help} onClose={() => setVisible('help', false)} />
     </main>

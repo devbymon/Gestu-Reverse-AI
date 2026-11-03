@@ -7,8 +7,7 @@ An immersive React and Three.js experiment for controlling a real-time 3D partic
 The particle engine, hand tracking, gesture recognition, and advanced effects remain intact. Phase 5 adds:
 
 - A responsive creative-technology workspace with a particle-first viewport, control sidebar, header, and live status bar.
-- Explicit AI Gesture and Manual modes with a single command source active at a time.
-- Real controls for all eight existing formations, particle count, size, animation speed, sensitivity, and palettes.
+- Gesture-driven formation selection with real controls for particle count, size, animation speed, sensitivity, and palettes.
 - Camera preview and landmark visibility controls that do not stop the underlying tracking session.
 - Live measured FPS, particle count, renderer state, camera state, and MediaPipe state.
 - First-use onboarding, a reusable gesture guide, fullscreen support, and an in-app presentation mode.
@@ -39,10 +38,9 @@ Then open the local URL printed by Vite.
 5. Move both hands out of frame and confirm the **No Hands Detected** state.
 6. Exercise each gesture listed below and verify that the gesture label stabilizes before the effect changes.
 7. Swipe once, verify the directional impulse, and confirm it does not repeatedly fire during cooldown.
-8. Use **Manual Mode** to select each of the eight effects, including Burst and Implosion.
-9. Change effects rapidly and confirm each transition starts from the currently visible positions.
-10. Select **Reset**, then **AI Gesture** to return priority to camera gestures.
-11. Select **Disable Camera** and confirm that the browser camera indicator turns off.
+8. Exercise the supported gestures and confirm each transition starts from the currently visible positions.
+9. Select **Reset** and confirm the particle appearance returns to its defaults without changing camera permission.
+10. Select **Disable Camera** and confirm that the browser camera indicator turns off.
 
 Physical camera and one/two-hand detection must be validated manually because they require a real camera and browser permission.
 
@@ -65,10 +63,10 @@ src/
 │   ├── HandLandmarkOverlay.tsx Canvas 2D hand skeleton rendering
 │   ├── HandTrackingStatus.tsx  Model and tracking status
 │   ├── ParticleScene.tsx       Particle lifecycle and performance bridge
-│   ├── controls/               Formation, mode, palette, and particle controls
+│   ├── controls/               Palette and particle appearance controls
 │   ├── help/                   Reopenable gesture and usage guide
 │   ├── layout/                 Header, sidebar, viewport overlay, and status bar
-│   ├── onboarding/             First-use camera/manual choice
+│   ├── onboarding/             First-use camera/preview choice
 │   └── presentation/           Essential presentation-mode actions
 ├── engine/
 │   ├── EffectPresets.ts         Visual and transition configurations
@@ -89,7 +87,7 @@ src/
 │   └── VortexFormation.ts       Three-dimensional funnel
 ├── hooks/
 │   ├── useGestureRecognition.ts Gesture controller bridge and UI throttling
-│   ├── useParticleEffects.ts    Manual/gesture priority and effect commands
+│   ├── useParticleEffects.ts    Gesture-to-effect command bridge
 │   ├── useHandTracking.ts       Camera and inference lifecycle
 │   ├── useDashboardState.ts     UI settings and visibility
 │   └── usePresentationMode.ts   Fullscreen and presentation state
@@ -127,7 +125,7 @@ The MediaPipe module is loaded lazily only after camera permission is granted. I
 | Hand Swipe | One-shot directional velocity impulse |
 | Two-Hand Expansion | High-energy expansion controlled by palm distance |
 
-`GestureCommand` remains independent from MediaPipe. `useParticleEffects()` maps it into a generic `ParticleEffectCommand`, which is the only interaction contract consumed by the renderer. The manual source has explicit priority while Manual Mode is active; selecting **AI Gesture** restores the gesture source.
+`GestureCommand` remains independent from MediaPipe. `useParticleEffects()` maps it into a generic `ParticleEffectCommand`, which is the only interaction contract consumed by the renderer. Gestures are the sole formation source, so appearance controls cannot block or override hand interaction.
 
 Priority is Two-Hand Expansion → Swipe → Pinch → Peace → Index Point → Open Palm → Closed Fist → Unknown. Swipe is a transient event; all other gestures are continuous and stabilized before activation.
 
@@ -143,9 +141,9 @@ Priority is Two-Hand Expansion → Swipe → Pinch → Peace → Index Point →
 
 Transitions snapshot the current particle positions once, interpolate toward stable destination buffers with cubic easing, and can be interrupted without resetting geometry. Dynamic formations update their reused destination buffer only when needed.
 
-## Dashboard controls and command priority
+## Dashboard controls and gesture priority
 
-The application starts in gesture-priority mode without requesting camera access. Selecting any preset enables manual priority, so camera gestures cannot compete with the selected effect. **Reset** restores default particle settings and the resting sphere while preserving the user's explicit camera state; **AI Gesture** returns authority to recognized gestures. Supernova Burst is a temporary action and returns to the previous persistent formation. Expensive particle-count changes are applied only after the slider interaction completes.
+The application starts without requesting camera access. Once enabled, stabilized gestures select formations directly; color and particle appearance controls remain independent and cannot disable gesture input. **Reset** restores default particle settings and gesture state while preserving the user's explicit camera permission. Expensive particle-count changes are applied only after the slider interaction completes.
 
 ## MediaPipe assets
 

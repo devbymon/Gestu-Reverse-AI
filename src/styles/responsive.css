@@ -24,14 +24,13 @@
   .welcome-dialog { padding: 35px 24px 26px; }
   .welcome-orbit { display: none; }
   .welcome-actions { flex-direction: column; }
-  .formation-grid { grid-template-columns: repeat(4,1fr); }
   .presentation-controls { top: 13px; right: 13px; }
   .presentation-controls button:first-child { display: none; }
   .dashboard-app.is-presentation .app-sidebar { right: 13px; bottom: 13px; width: min(260px,calc(100% - 26px)); max-height: 245px; overflow-y: auto; }
-  .dashboard-app.is-presentation .camera-viewport { height: 92px; }
+  .dashboard-app.is-presentation .camera-viewport { height: auto; }
 }
 
 @media (max-height: 650px) and (min-width: 701px) {
   .control-section { padding-top: 12px; padding-bottom: 12px; }
-  .camera-viewport { height: 110px; }
+  .camera-viewport { height: auto; }
 }

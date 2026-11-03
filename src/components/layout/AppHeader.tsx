@@ -1,9 +1,7 @@
-import type { InteractionMode } from '../../types/dashboard'
 import type { TrackingStatus } from '../../types/handTracking'
 import Icon from '../ui/Icon'
 
 interface AppHeaderProps {
-  mode: InteractionMode
   cameraStatus: TrackingStatus
   presentationMode: boolean
   onMenu: () => void
@@ -20,7 +18,6 @@ function cameraLabel(status: TrackingStatus): string {
 }
 
 export default function AppHeader({
-  mode,
   cameraStatus,
   presentationMode,
   onMenu,
@@ -41,21 +38,21 @@ export default function AppHeader({
       <div className="header-status" aria-label="System status">
         <span><i className="status-dot is-online" /> System online</span>
         <span><i className={cameraActive ? 'status-dot is-online' : 'status-dot'} /> {cameraLabel(cameraStatus)}</span>
-        <span className="mode-chip">{mode === 'AI' ? 'AI Gesture' : 'Manual'} mode</span>
+        <span className="mode-chip">Gesture control</span>
       </div>
       <nav className="header-actions" aria-label="Application actions">
-        <button className="icon-button" type="button" onClick={onHelp} aria-label="Open help" title="Help">
-          <Icon name="help" />
-        </button>
-        <button className="icon-button" type="button" onClick={onFullscreen} aria-label="Toggle fullscreen" title="Fullscreen">
-          <Icon name="fullscreen" />
-        </button>
         <button
           className={`presentation-button ${presentationMode ? 'is-active' : ''}`}
           type="button"
           onClick={onPresentation}
         >
           <Icon name="presentation" /> Present
+        </button>
+        <button className="icon-button" type="button" onClick={onFullscreen} aria-label="Toggle fullscreen" title="Fullscreen">
+          <Icon name="fullscreen" />
+        </button>
+        <button className="icon-button" type="button" onClick={onHelp} aria-label="Open help" title="Help">
+          <Icon name="help" />
         </button>
       </nav>
     </header>

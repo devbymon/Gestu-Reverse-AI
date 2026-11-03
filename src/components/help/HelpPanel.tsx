@@ -17,7 +17,7 @@ export default function HelpPanel({ open, onClose }: HelpPanelProps) {
           <div><span className="dialog-kicker">Quick guide</span><h2 id="help-title">Control the experience</h2></div>
           <button className="icon-button" type="button" onClick={onClose} aria-label="Close help"><Icon name="close" /></button>
         </div>
-        <p>Choose <strong>AI Gesture</strong>, enable the camera, and keep your hand inside the preview. Or switch to <strong>Manual</strong> to choose a formation directly. Use <strong>Reset</strong> in Particle System to restore the defaults.</p>
+        <p>Enable the camera and keep your full hand inside the preview. Your gesture selects the formation automatically. Use <strong>Reset</strong> in Particle Appearance to restore the defaults.</p>
         <div className="gesture-guide">
           {gestures.map(([gesture, effect]) => <div key={gesture}><span>{gesture}</span><strong>{effect}</strong></div>)}
         </div>

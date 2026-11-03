@@ -47,7 +47,7 @@ export default function ParticleControls({ settings, onChange, onReset }: Partic
   return (
     <section className="control-section" aria-labelledby="particle-controls-title">
       <div className="section-heading">
-        <div><span>02</span><h2 id="particle-controls-title">Particle System</h2></div>
+        <div><span>03</span><h2 id="particle-controls-title">Particle Appearance</h2></div>
         <button className="text-action" type="button" onClick={onReset}>
           <Icon name="reset" size={13} /> Reset
         </button>

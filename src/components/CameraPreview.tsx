@@ -54,7 +54,7 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
     return (
       <section className="camera-module control-section" aria-labelledby="camera-title">
         <div className="section-heading">
-          <div><span>03</span><h2 id="camera-title">AI Hand Tracking</h2></div>
+          <div><span>01</span><h2 id="camera-title">AI Hand Tracking</h2></div>
           <span className="privacy-chip">Local only</span>
         </div>
 

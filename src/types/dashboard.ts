@@ -1,5 +1,3 @@
-export type InteractionMode = 'AI' | 'MANUAL'
-
 export interface DashboardVisibility {
   sidebar: boolean
   cameraPreview: boolean
