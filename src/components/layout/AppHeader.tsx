@@ -4,7 +4,6 @@ import Icon from '../ui/Icon'
 interface AppHeaderProps {
   cameraStatus: TrackingStatus
   presentationMode: boolean
-  onMenu: () => void
   onHelp: () => void
   onFullscreen: () => void
   onPresentation: () => void
@@ -20,7 +19,6 @@ function cameraLabel(status: TrackingStatus): string {
 export default function AppHeader({
   cameraStatus,
   presentationMode,
-  onMenu,
   onHelp,
   onFullscreen,
   onPresentation,
@@ -28,9 +26,6 @@ export default function AppHeader({
   const cameraActive = cameraStatus === 'active' || cameraStatus === 'no-hands'
   return (
     <header className="app-header">
-      <button className="icon-button sidebar-toggle" type="button" onClick={onMenu} aria-label="Toggle controls">
-        <Icon name="menu" />
-      </button>
       <div className="app-brand">
         <div className="brand-mark" aria-hidden="true"><span /></div>
         <div><span>AI Interaction Lab</span><strong>Gestu Reverse <em>AI</em></strong></div>

@@ -18,7 +18,7 @@ export default function WelcomeDialog({ open, onStartCamera, onExploreDemo, onCl
         <div className="welcome-orbit" aria-hidden="true"><span /></div>
         <span className="dialog-kicker">Interactive particle laboratory</span>
         <h1 id="welcome-title">Welcome to<br /><em>Gestu Reverse AI.</em></h1>
-        <p>Control thousands of particles using your hands, or explore the colors and particle appearance without a camera.</p>
+        <p>Control thousands of particles using your hands, or watch the ambient particle universe without a camera.</p>
         <div className="welcome-actions">
           <button className="primary-button" type="button" onClick={onStartCamera}>
             <Icon name="camera" /> Start with camera

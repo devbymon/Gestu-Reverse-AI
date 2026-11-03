@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ParticleScene from './components/ParticleScene'
-import type { CameraPanelHandle } from './components/CameraPreview'
+import CameraPreview, { type CameraPanelHandle } from './components/CameraPreview'
 import AppHeader from './components/layout/AppHeader'
-import AppSidebar from './components/layout/AppSidebar'
 import StatusBar from './components/layout/StatusBar'
 import ViewportOverlay from './components/layout/ViewportOverlay'
 import HelpPanel from './components/help/HelpPanel'
 import WelcomeDialog from './components/onboarding/WelcomeDialog'
 import PresentationControls from './components/presentation/PresentationControls'
-import GestureGuide from './components/gestures/GestureGuide'
 import { useDashboardState } from './hooks/useDashboardState'
 import { useGestureRecognition } from './hooks/useGestureRecognition'
 import { useParticleEffects } from './hooks/useParticleEffects'
@@ -33,20 +31,13 @@ function App() {
   const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
   const particleEffects = useParticleEffects(commandRef)
   const activeEffect = getGestureFormation(gestureState.gesture, gestureState.candidate)
-  const { settings, visibility, updateSettings, resetSettings, getSettings, setVisible, dismissWelcome } = dashboard
+  const { visibility, getSettings, setVisible, dismissWelcome } = dashboard
   const { presentationMode, requestFullscreen, enterPresentation, exitPresentation } = presentation
   const { getEffectCommand } = particleEffects
 
   const handlePerformance = useCallback((metrics: ParticlePerformance) => setPerformance(metrics), [])
   const handleEngineError = useCallback((message: string | null) => setEngineError(message), [])
   const handleTrackingState = useCallback((state: HandTrackingState) => setTrackingState(state), [])
-  const closeSidebar = useCallback(() => setVisible('sidebar', false), [setVisible])
-
-  const handleReset = useCallback(() => {
-    resetSettings()
-    resetGestures()
-  }, [resetGestures, resetSettings])
-
   const startCamera = useCallback(() => {
     dismissWelcome()
     void cameraRef.current?.enableCamera()
@@ -73,7 +64,6 @@ function App() {
     <main className={`dashboard-app ${presentationMode ? 'is-presentation' : ''}`}>
       <AppHeader
         cameraStatus={trackingState.status} presentationMode={presentationMode}
-        onMenu={() => setVisible('sidebar', !visibility.sidebar)}
         onHelp={() => setVisible('help', true)}
         onFullscreen={() => void requestFullscreen()}
         onPresentation={togglePresentation}
@@ -84,7 +74,11 @@ function App() {
             getEffectCommand={getEffectCommand} getSettings={getSettings}
             onPerformance={handlePerformance} onEngineError={handleEngineError}
           />
-          <GestureGuide state={gestureState} />
+          <div className="hero-copy">
+            <span className="hero-index">01 — PARTICLE ENGINE</span>
+            <h1>A universe<br />waiting for <em>you.</em></h1>
+            <p>Ten thousand points of light, suspended in motion and prepared for real-time gestural input.</p>
+          </div>
           <ViewportOverlay
             formation={activeEffect} gesture={gestureState}
             particleCount={performance?.particleCount ?? null} compact={presentationMode}
@@ -95,19 +89,14 @@ function App() {
               onHelp={() => setVisible('help', true)}
             />
           )}
+          <CameraPreview
+            ref={cameraRef}
+            gestureState={gestureState}
+            onTrackingFrame={processFrame}
+            onTrackingReset={resetGestures}
+            onStateChange={handleTrackingState}
+          />
         </section>
-        {visibility.sidebar && <button className="sidebar-backdrop" type="button" aria-label="Close controls" onClick={closeSidebar} />}
-        <AppSidebar
-          open={visibility.sidebar} cameraRef={cameraRef} settings={settings}
-          gestureState={gestureState}
-          showPreview={visibility.cameraPreview} showLandmarks={visibility.landmarks}
-          onClose={closeSidebar}
-          onSettingsChange={updateSettings} onReset={handleReset}
-          onPreviewChange={(visible) => setVisible('cameraPreview', visible)}
-          onLandmarksChange={(visible) => setVisible('landmarks', visible)}
-          onTrackingFrame={processFrame} onTrackingReset={resetGestures}
-          onTrackingState={handleTrackingState}
-        />
       </div>
       <StatusBar performance={performance} tracking={trackingState} engineError={engineError} />
       <WelcomeDialog open={visibility.welcome} onStartCamera={startCamera} onExploreDemo={exploreDemo} onClose={dismissWelcome} />

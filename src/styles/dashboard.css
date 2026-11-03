@@ -16,7 +16,7 @@
 .presentation-button { height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px; background: #151925; display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 11px; }
 .presentation-button:hover, .presentation-button.is-active { color: #fff; border-color: #64748b; background: #1b2130; }
 
-.dashboard-shell { position: relative; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) var(--sidebar-width); }
+.dashboard-shell { position: relative; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
 .particle-viewport { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: radial-gradient(circle at 50% 48%, rgb(33 65 125 / 15%), transparent 42%), #04060c; }
 .particle-viewport::after { display: none; }
 .particle-stage, .particle-canvas { position: absolute; inset: 0; }
@@ -24,11 +24,17 @@
 .particle-orbit { position: absolute; top: 50%; left: 50%; width: min(66vh, 62vw); aspect-ratio: 1; border: 1px solid rgb(34 211 238 / 8%); border-radius: 50%; transform: translate(-50%,-50%) rotateX(70deg); pointer-events: none; }
 .particle-orbit::after { content: ''; position: absolute; inset: 13%; border: 1px dashed rgb(155 108 255 / 10%); border-radius: inherit; }
 .particle-error { position: absolute; z-index: 4; inset: 50% auto auto 50%; transform: translate(-50%,-50%); width: min(360px,calc(100% - 40px)); padding: 14px; border: 1px solid rgb(251 113 133 / 35%); background: rgb(15 23 42 / 94%); color: #fda4af; text-align: center; font: 10px/1.5 var(--mono); }
-.viewport-overlay { position: absolute; z-index: 3; top: 28px; left: 36px; display: grid; grid-template-columns: repeat(2,max-content); gap: 10px 28px; pointer-events: none; }
+.viewport-overlay { position: absolute; z-index: 3; top: 28px; right: 36px; display: grid; grid-template-columns: repeat(2,max-content); gap: 10px 28px; pointer-events: none; }
 .viewport-overlay div { display: flex; flex-direction: column; gap: 3px; }
 .viewport-overlay span { color: var(--muted); font: 9px var(--mono); }
 .viewport-overlay strong { font: 500 11px var(--mono); color: #c9d5e6; }
 .viewport-overlay.is-compact { grid-template-columns: repeat(2,max-content); }
+
+.hero-copy { position: absolute; z-index: 3; top: 50%; left: clamp(28px,7vw,110px); width: min(410px,35vw); transform: translateY(-50%); pointer-events: none; }
+.hero-index { color: var(--cyan); font: 9px var(--mono); letter-spacing: .12em; }
+.hero-copy h1 { margin: 17px 0 22px; font-size: clamp(42px,5.3vw,78px); font-weight: 300; line-height: .93; letter-spacing: -.055em; }
+.hero-copy h1 em { color: transparent; font-family: Georgia,serif; font-weight: 400; -webkit-text-stroke: 1px var(--violet); }
+.hero-copy p { max-width: 330px; margin: 0; padding-left: 15px; border-left: 1px solid rgb(103 213 228 / 35%); color: var(--muted); font-size: 11px; line-height: 1.8; }
 
 .app-sidebar { position: relative; z-index: 20; min-height: 0; overflow-y: auto; padding-bottom: 12px; border-left: 1px solid var(--line); background: #090b12; scrollbar-color: #26334b transparent; }
 .sidebar-heading { position: sticky; top: 0; z-index: 3; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--line); background: rgb(10 14 26 / 96%); display: flex; align-items: center; justify-content: space-between; }
@@ -57,7 +63,9 @@
 .palette-picker button i { display: block; border-radius: 50%; }
 .palette-picker button.is-active { border-color: var(--cyan); box-shadow: 0 0 0 2px rgb(34 211 238 / 10%); }
 
-.camera-viewport { position: relative; width: 100%; height: auto; aspect-ratio: 4 / 3; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #04060a; }
+.camera-panel { position: absolute; z-index: 7; right: 28px; bottom: 24px; width: 330px; max-height: calc(100% - 100px); overflow-y: auto; padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: rgb(11 14 23 / 94%); box-shadow: 0 22px 65px rgb(0 0 0 / 42%); scrollbar-width: thin; }
+.camera-panel .section-heading { margin-bottom: 11px; }
+.camera-viewport { position: relative; width: 100%; height: auto; aspect-ratio: 4 / 3; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #04060a; }
 .camera-video, .landmark-overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .camera-video { transform: scaleX(-1); }
 .landmark-overlay[hidden] { display: none; }
@@ -84,7 +92,7 @@
 .camera-button svg { margin-right: 6px; vertical-align: middle; }
 .camera-button--stop { border-color: rgb(251 113 133 / 28%); background: rgb(251 113 133 / 6%); color: #fda4af; }
 .camera-consent { margin: 8px 0 0; color: var(--muted); font-size: 8px; line-height: 1.45; }
-.gesture-module .gesture-indicator { min-height: 118px; }
+.gesture-indicator { min-height: 118px; padding-top: 10px; border-top: 1px solid var(--line); }
 .gesture-indicator__topline { display: flex; justify-content: space-between; }
 .gesture-indicator span { color: var(--muted); font-size: 9px; }
 .gesture-indicator__topline .is-stable { color: var(--green); }
@@ -100,21 +108,6 @@
 .gesture-debug div { min-width: 0; }
 .gesture-debug dt { margin-bottom: 2px; color: #64748b; }
 .gesture-debug dd { margin: 0; overflow: hidden; color: #9aa7b9; text-overflow: ellipsis; white-space: nowrap; }
-
-.gesture-map { position: absolute; z-index: 4; bottom: 28px; left: 28px; width: 250px; padding: 15px 16px; border: 1px solid var(--line); border-radius: 12px; background: rgb(8 10 17 / 88%); box-shadow: 0 16px 45px rgb(0 0 0 / 24%); }
-.gesture-map__heading { margin-bottom: 9px; padding-bottom: 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
-.gesture-map__heading > span { color: #dce5f0; font-size: 11px; font-weight: 620; }
-.gesture-map__heading small { color: var(--muted); font: 8px var(--mono); }
-.gesture-map__rows { display: grid; }
-.gesture-map__row { position: relative; min-height: 34px; padding: 5px 5px; border-radius: 7px; display: grid; grid-template-columns: 27px 72px 18px 1fr; align-items: center; color: #8c96a7; transition: color .18s ease,background-color .18s ease; }
-.gesture-map__row::before { content: ''; position: absolute; left: -16px; width: 2px; height: 18px; border-radius: 2px; background: transparent; }
-.gesture-map__row strong { font-size: 10px; font-weight: 650; letter-spacing: .05em; }
-.gesture-map__row > span:last-child { font: 9px var(--mono); }
-.gesture-map__symbol { width: 22px; height: 22px; border: 1px solid color-mix(in srgb,var(--gesture-color) 34%,transparent); border-radius: 6px; display: grid; place-items: center; color: var(--gesture-color); font: 650 7px var(--mono); letter-spacing: .03em; }
-.gesture-map__arrow { color: #475569; }
-.gesture-map__row.is-active { color: #f8fafc; background: color-mix(in srgb,var(--gesture-color) 10%,transparent); }
-.gesture-map__row.is-active::before { background: var(--gesture-color); }
-.gesture-map__row.is-active .gesture-map__arrow, .gesture-map__row.is-active > span:last-child { color: var(--gesture-color); }
 
 .status-bar { z-index: 25; display: flex; align-items: center; gap: 24px; padding: 0 16px; border-top: 1px solid var(--line); background: #070a12; color: var(--muted); font: 8px var(--mono); text-transform: uppercase; }
 .status-bar span { white-space: nowrap; }
@@ -154,7 +147,6 @@
 .dashboard-app.is-presentation { grid-template-rows: 1fr; }
 .dashboard-app.is-presentation .app-header, .dashboard-app.is-presentation .status-bar { display: none; }
 .dashboard-app.is-presentation .dashboard-shell { grid-template-columns: 1fr; }
-.dashboard-app.is-presentation .sidebar-backdrop { display: none; }
-.dashboard-app.is-presentation .app-sidebar { position: absolute; z-index: 4; inset: auto 22px 22px auto; width: 285px; max-height: calc(100% - 80px); border: 1px solid var(--line); border-radius: 8px; background: rgb(10 14 26 / 92%); transform: none; box-shadow: 0 12px 45px rgb(0 0 0 / 38%); }
-.dashboard-app.is-presentation .app-sidebar > :not(.camera-module) { display: none; }
-.dashboard-app.is-presentation .camera-module { border: 0; }
+.dashboard-app.is-presentation .hero-copy { display: none; }
+.dashboard-app.is-presentation .viewport-overlay { right: auto; left: 22px; }
+.dashboard-app.is-presentation .camera-panel { right: 22px; bottom: 22px; }

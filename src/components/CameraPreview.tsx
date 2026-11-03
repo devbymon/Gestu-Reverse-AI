@@ -10,7 +10,9 @@ import HandLandmarkOverlay, {
 } from './HandLandmarkOverlay'
 import HandTrackingStatus from './HandTrackingStatus'
 import type { HandTrackingFrame, HandTrackingState } from '../types/handTracking'
+import type { GestureRecognitionState } from '../types/gestures'
 import Icon from './ui/Icon'
+import GestureIndicator from './GestureIndicator'
 
 export interface CameraPanelHandle {
   enableCamera: () => Promise<void>
@@ -18,10 +20,7 @@ export interface CameraPanelHandle {
 }
 
 interface CameraPreviewProps {
-  showPreview: boolean
-  showLandmarks: boolean
-  onPreviewChange: (visible: boolean) => void
-  onLandmarksChange: (visible: boolean) => void
+  gestureState: GestureRecognitionState
   onTrackingFrame: (frame: HandTrackingFrame) => void
   onTrackingReset: () => void
   onStateChange: (state: HandTrackingState) => void
@@ -29,10 +28,7 @@ interface CameraPreviewProps {
 
 const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
   function CameraPreview({
-    showPreview,
-    showLandmarks,
-    onPreviewChange,
-    onLandmarksChange,
+    gestureState,
     onTrackingFrame,
     onTrackingReset,
     onStateChange,
@@ -52,14 +48,14 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
     useEffect(() => onStateChange(state), [onStateChange, state])
 
     return (
-      <section className="camera-module control-section" aria-labelledby="camera-title">
+      <aside className="camera-panel" aria-labelledby="camera-title">
         <div className="section-heading">
           <div><span>01</span><h2 id="camera-title">AI Hand Tracking</h2></div>
           <span className="privacy-chip">Local only</span>
         </div>
 
         <div
-          className={`camera-viewport camera-viewport--${state.status} ${showPreview ? '' : 'is-preview-hidden'}`}
+          className={`camera-viewport camera-viewport--${state.status}`}
           aria-busy={isTransitioning}
         >
           <video
@@ -69,7 +65,7 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
             playsInline
             aria-label="Mirrored camera preview"
           />
-          <HandLandmarkOverlay ref={overlayRef} visible={showLandmarks} />
+          <HandLandmarkOverlay ref={overlayRef} />
           {!isRunning && (
             <div className="camera-placeholder">
               <span className="camera-reticle" aria-hidden="true"><i /></span>
@@ -89,24 +85,7 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
         </div>
 
         <HandTrackingStatus state={state} />
-        <div className="camera-visibility-controls" role="group" aria-label="Camera visibility">
-          <button
-            type="button"
-            aria-pressed={showPreview}
-            onClick={() => onPreviewChange(!showPreview)}
-          >
-            <Icon name={showPreview ? 'eye' : 'eyeOff'} size={14} />
-            {showPreview ? 'Hide preview' : 'Show preview'}
-          </button>
-          <button
-            type="button"
-            aria-pressed={showLandmarks}
-            onClick={() => onLandmarksChange(!showLandmarks)}
-          >
-            <Icon name="hand" size={14} />
-            {showLandmarks ? 'Hide landmarks' : 'Show landmarks'}
-          </button>
-        </div>
+        <GestureIndicator state={gestureState} />
         <button
           className={`camera-button ${isRunning ? 'camera-button--stop' : ''}`}
           type="button"
@@ -119,7 +98,7 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
         <p className="camera-consent">
           Camera access is explicit. Frames are processed locally and never recorded.
         </p>
-      </section>
+      </aside>
     )
   },
 )
