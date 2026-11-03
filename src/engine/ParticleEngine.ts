@@ -1,25 +1,27 @@
 import * as THREE from 'three'
+import { createInitialCloud } from './ParticleFormations'
+import { FormationRegistry } from './FormationRegistry'
+import { FormationTransition } from './FormationTransition'
+import { getEffectPreset } from './EffectPresets'
 import {
-  createInitialCloud,
-  createSphereTargets,
-  writeExpandedSphereTargets,
-  writeImplosionTargets,
-  writeSphereTargets,
-  writeVortexTargets,
-  writeWaveTargets,
-} from './ParticleFormations'
+  applyDirectionalImpulse,
+  applyOrbitalForce,
+  applyRadialImpulse,
+  applyRepulsion,
+  limitVelocities,
+} from './ParticleForces'
 import { stepParticlePhysics } from './ParticlePhysics'
-import {
-  NEUTRAL_PARTICLE_INTERACTION,
-  type ParticleInteraction,
-  type ParticlePerformance,
-} from '../types/particles'
-import type { GestureCommand, GestureType } from '../types/gestures'
-import { UNKNOWN_GESTURE_COMMAND } from '../types/gestures'
+import type { ParticlePerformance } from '../types/particles'
+import type {
+  FormationContext,
+  ParticleEffectCommand,
+} from '../types/particleEffects'
+import { DEFAULT_EFFECT_COMMAND } from '../types/particleEffects'
+import { normalizedHandToWorld } from '../utils/coordinateMapping'
+import { clamp01 } from '../utils/easing'
 
 const INITIAL_PARTICLE_COUNT = 10_000
 const BALANCED_PARTICLE_COUNT = 7_500
-const SPHERE_RADIUS = 2.45
 const LOW_FPS_THRESHOLD = 42
 const LOW_FPS_SAMPLE_LIMIT = 4
 
@@ -27,25 +29,27 @@ const vertexShader = `
   attribute float aSize;
   attribute vec3 aColor;
   varying vec3 vColor;
+  uniform float uEnergy;
 
   void main() {
     vColor = aColor;
     vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = aSize * (150.0 / -viewPosition.z);
+    gl_PointSize = aSize * (1.0 + uEnergy * 0.3) * (150.0 / -viewPosition.z);
     gl_Position = projectionMatrix * viewPosition;
   }
 `
 
 const fragmentShader = `
   varying vec3 vColor;
+  uniform float uEnergy;
 
   void main() {
     float distanceToCenter = length(gl_PointCoord - vec2(0.5));
     if (distanceToCenter > 0.5) discard;
     float core = 1.0 - smoothstep(0.0, 0.16, distanceToCenter);
     float halo = 1.0 - smoothstep(0.08, 0.5, distanceToCenter);
-    float alpha = core * 0.9 + halo * 0.28;
-    gl_FragColor = vec4(vColor * (1.0 + core * 1.8), alpha);
+    float alpha = core * 0.9 + halo * (0.28 + uEnergy * 0.12);
+    gl_FragColor = vec4(vColor * (1.0 + core * (1.8 + uEnergy)), alpha);
   }
 `
 
@@ -56,31 +60,35 @@ export class ParticleEngine {
   private readonly clock = new THREE.Clock()
   private readonly container: HTMLElement
   private readonly onPerformance?: (performance: ParticlePerformance) => void
-  private readonly getGestureCommand?: () => GestureCommand
+  private readonly getEffectCommand?: () => ParticleEffectCommand
+  private readonly formations = new FormationRegistry()
+  private readonly transition = new FormationTransition()
+  private readonly uniforms = { uEnergy: { value: 0 } }
   private points: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null = null
   private velocities: Float32Array<ArrayBufferLike> = new Float32Array()
   private targets: Float32Array<ArrayBufferLike> = new Float32Array()
-  private interaction: ParticleInteraction = NEUTRAL_PARTICLE_INTERACTION
+  private formationTargets: Float32Array<ArrayBufferLike> = new Float32Array()
+  private currentCommand: ParticleEffectCommand = DEFAULT_EFFECT_COMMAND
   private animationFrame = 0
   private particleCount = INITIAL_PARTICLE_COUNT
   private elapsedFrames = 0
   private elapsedSampleTime = 0
   private lowFpsSamples = 0
-  private quality: ParticlePerformance['quality'] = 'high'
-  private currentGesture: GestureType = 'UNKNOWN'
-  private currentCommand: GestureCommand = UNKNOWN_GESTURE_COMMAND
-  private lastCommandTimestamp = Number.NEGATIVE_INFINITY
-  private lastSwipeTimestamp = Number.NEGATIVE_INFINITY
   private formationFrame = 0
+  private lastCommandTimestamp = Number.NEGATIVE_INFINITY
+  private lastTriggerId = Number.NEGATIVE_INFINITY
+  private energy = 0
+  private contextLost = false
+  private quality: ParticlePerformance['quality'] = 'high'
 
   constructor(
     container: HTMLElement,
     onPerformance?: (performance: ParticlePerformance) => void,
-    getGestureCommand?: () => GestureCommand,
+    getEffectCommand?: () => ParticleEffectCommand,
   ) {
     this.container = container
     this.onPerformance = onPerformance
-    this.getGestureCommand = getGestureCommand
+    this.getEffectCommand = getEffectCommand
     this.renderer = new THREE.WebGLRenderer({
       antialias: false,
       alpha: true,
@@ -88,16 +96,18 @@ export class ParticleEngine {
     })
     this.renderer.setClearColor(0x050510, 0)
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
-    this.renderer.domElement.setAttribute('aria-label', 'Animated 3D particle sphere')
+    this.renderer.domElement.setAttribute('aria-label', 'Interactive 3D particle formations')
     this.renderer.domElement.setAttribute('role', 'img')
+    this.renderer.domElement.addEventListener('webglcontextlost', this.handleContextLost)
+    this.renderer.domElement.addEventListener('webglcontextrestored', this.handleContextRestored)
     this.container.appendChild(this.renderer.domElement)
-    this.camera.position.set(0, 0, 7.2)
+    this.camera.position.set(0, 0, 7.6)
     this.createParticles(this.particleCount)
     this.resize()
   }
 
   start(): void {
-    if (this.animationFrame) return
+    if (this.animationFrame || this.contextLost) return
     this.clock.start()
     this.animate()
   }
@@ -106,10 +116,6 @@ export class ParticleEngine {
     cancelAnimationFrame(this.animationFrame)
     this.animationFrame = 0
     this.clock.stop()
-  }
-
-  setInteraction(interaction: Partial<ParticleInteraction>): void {
-    this.interaction = { ...this.interaction, ...interaction }
   }
 
   resize(): void {
@@ -122,6 +128,8 @@ export class ParticleEngine {
 
   dispose(): void {
     this.stop()
+    this.renderer.domElement.removeEventListener('webglcontextlost', this.handleContextLost)
+    this.renderer.domElement.removeEventListener('webglcontextrestored', this.handleContextRestored)
     this.disposeParticles()
     this.renderer.renderLists.dispose()
     this.renderer.dispose()
@@ -132,46 +140,34 @@ export class ParticleEngine {
   private createParticles(count: number): void {
     this.disposeParticles()
     this.particleCount = count
-    this.targets = createSphereTargets(count, SPHERE_RADIUS)
-    const positions = createInitialCloud(this.targets, 1.65)
+    this.targets = new Float32Array(count * 3)
+    this.formationTargets = new Float32Array(count * 3)
+    this.transition.resize(count * 3)
+    this.generateFormation(this.clock.elapsedTime)
+    this.targets.set(this.formationTargets)
+    const positions = createInitialCloud(this.formationTargets, 1.45)
     this.velocities = new Float32Array(positions.length)
-    const colors = new Float32Array(positions.length)
-    const sizes = new Float32Array(count)
-    const cyan = new THREE.Color('#00e5ff')
-    const blue = new THREE.Color('#2563eb')
-    const violet = new THREE.Color('#a855f7')
-
-    for (let index = 0; index < count; index += 1) {
-      const offset = index * 3
-      const palettePosition = (index % 197) / 196
-      const color = palettePosition < 0.52
-        ? cyan.clone().lerp(blue, palettePosition / 0.52)
-        : blue.clone().lerp(violet, (palettePosition - 0.52) / 0.48)
-      colors[offset] = color.r
-      colors[offset + 1] = color.g
-      colors[offset + 2] = color.b
-      sizes[index] = 0.075 + ((index * 17) % 23) / 650
-    }
-
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute(
       'position',
       new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage),
     )
-    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3))
-    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1))
+    geometry.setAttribute(
+      'aColor',
+      new THREE.BufferAttribute(new Float32Array(positions.length), 3).setUsage(THREE.DynamicDrawUsage),
+    )
+    geometry.setAttribute('aSize', new THREE.BufferAttribute(new Float32Array(count), 1))
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
+      uniforms: this.uniforms,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     })
     this.points = new THREE.Points(geometry, material)
     this.scene.add(this.points)
-    if (this.currentGesture !== 'UNKNOWN') {
-      this.writeFormation(this.currentCommand, this.clock.elapsedTime)
-    }
+    this.updateParticleStyle()
   }
 
   private disposeParticles(): void {
@@ -188,29 +184,30 @@ export class ParticleEngine {
     const elapsed = this.clock.elapsedTime
     const points = this.points
     if (!points) return
-
-    this.consumeGestureCommand(elapsed)
-    this.updateDynamicFormation(elapsed)
-
     const positionAttribute = points.geometry.getAttribute('position')
     const positions = positionAttribute.array as Float32Array
+
+    this.consumeCommand(positions, elapsed)
+    this.updateFormation(elapsed)
+    this.applyContinuousForces(positions, delta)
+    const isImploding = this.currentCommand.effect === 'IMPLOSION'
     stepParticlePhysics(positions, this.velocities, this.targets, delta, {
-      spring: 0.035,
-      damping: 0.88,
-      turbulence: 0.00045 + Math.max(this.interaction.energy, this.currentCommand.intensity) * 0.0015,
+      spring: isImploding ? 0.052 : 0.034,
+      damping: isImploding ? 0.9 : 0.885,
+      turbulence: 0.0004 + this.currentCommand.intensity * 0.0012,
     })
+    limitVelocities(this.velocities, 0.32)
     positionAttribute.needsUpdate = true
-    const gestureRotation = this.currentGesture === 'INDEX_POINT' ? 0.72 : 0.12
-    points.rotation.y += delta * (gestureRotation + this.interaction.energy * 0.12)
-    points.rotation.x = Math.sin(elapsed * 0.24) * 0.15
-    points.position.x = THREE.MathUtils.lerp(points.position.x, this.interaction.x * 0.5, 0.04)
-    points.position.y = THREE.MathUtils.lerp(points.position.y, this.interaction.y * 0.35, 0.04)
-    const gestureScale = this.currentGesture === 'TWO_HAND_EXPANSION'
-      ? this.currentCommand.intensity * 0.09
-      : 0
-    const pulse = 1 + Math.sin(elapsed * 1.25) * 0.025 +
-      this.interaction.expansion * 0.28 + gestureScale
-    points.scale.setScalar(pulse)
+
+    this.energy = Math.max(0, this.energy - delta * 0.7)
+    this.uniforms.uEnergy.value = this.energy
+    const preset = getEffectPreset(this.currentCommand.effect)
+    points.rotation.y += delta * preset.rotationSpeed
+    points.rotation.x = Math.sin(elapsed * 0.2) * 0.08
+    const heartbeat = this.currentCommand.effect === 'HEART'
+      ? Math.pow(Math.max(0, Math.sin(elapsed * 3.1)), 8) * 0.07
+      : Math.sin(elapsed * 1.25) * 0.018
+    points.scale.setScalar(1 + heartbeat + this.energy * 0.025)
     this.camera.position.x = Math.sin(elapsed * 0.13) * 0.16
     this.camera.position.y = Math.cos(elapsed * 0.1) * 0.08
     this.camera.lookAt(0, 0, 0)
@@ -218,101 +215,168 @@ export class ParticleEngine {
     this.samplePerformance(delta)
   }
 
-  private consumeGestureCommand(elapsed: number): void {
-    const command = this.getGestureCommand?.()
-    if (!command || command.timestamp === this.lastCommandTimestamp) return
-    this.lastCommandTimestamp = command.timestamp
+  private consumeCommand(positions: Float32Array, elapsed: number): void {
+    const incoming = this.getEffectCommand?.()
+    if (!incoming) return
+    const commandChanged = incoming.timestamp !== this.lastCommandTimestamp ||
+      incoming.effect !== this.currentCommand.effect || incoming.source !== this.currentCommand.source
+    const triggerChanged = incoming.triggerId !== this.lastTriggerId
+    if (!commandChanged && !triggerChanged) return
 
-    if (command.gesture === 'SWIPE') {
-      if (command.timestamp !== this.lastSwipeTimestamp) {
-        this.lastSwipeTimestamp = command.timestamp
-        this.applySwipeImpulse(command)
-      }
-      return
+    const effectChanged = incoming.effect !== this.currentCommand.effect
+    this.lastCommandTimestamp = incoming.timestamp
+    this.currentCommand = this.sanitizeCommand(incoming)
+    if (effectChanged) {
+      this.generateFormation(elapsed)
+      const preset = getEffectPreset(this.currentCommand.effect)
+      this.transition.begin(positions, this.formationTargets, preset.transitionDuration, elapsed)
+      this.updateParticleStyle()
+      this.energy = Math.max(this.energy, 0.35)
+    } else if (!this.transition.isActive && this.requiresSpatialUpdate()) {
+      this.generateFormation(elapsed)
+      this.targets.set(this.formationTargets)
     }
 
-    const gestureChanged = command.gesture !== this.currentGesture
-    this.currentGesture = command.gesture
-    this.currentCommand = command
-    if (gestureChanged || command.gesture === 'PINCH' || command.gesture === 'INDEX_POINT' ||
-      command.gesture === 'TWO_HAND_EXPANSION') {
-      this.writeFormation(command, elapsed)
+    if (triggerChanged && this.currentCommand.trigger) {
+      this.lastTriggerId = this.currentCommand.triggerId
+      this.applyTrigger(positions)
     }
   }
 
-  private updateDynamicFormation(elapsed: number): void {
+  private updateFormation(elapsed: number): void {
+    if (this.transition.isActive) {
+      this.transition.update(this.targets, elapsed)
+      return
+    }
     this.formationFrame += 1
-    if (this.currentGesture !== 'PEACE' || this.formationFrame % 2 !== 0) return
-    writeWaveTargets(
-      this.targets,
-      this.particleCount,
-      elapsed,
-      0.45 + this.currentCommand.intensity * 0.65,
+    if (this.formationFrame % 2 !== 0) return
+    const updated = this.formations.update(
+      this.currentCommand.effect,
+      this.formationTargets,
+      this.createFormationContext(elapsed),
+    )
+    if (updated) this.targets.set(this.formationTargets)
+  }
+
+  private applyContinuousForces(positions: Float32Array, delta: number): void {
+    const center = normalizedHandToWorld(this.currentCommand.position, this.camera.aspect)
+    if (this.currentCommand.effect === 'VORTEX' || this.currentCommand.effect === 'GALAXY') {
+      applyOrbitalForce(positions, this.velocities, center, 0.0018, delta)
+    }
+    if (this.currentCommand.effect === 'ENERGY_BURST') {
+      applyRepulsion(positions, this.velocities, center, 1.3, 0.0015, delta)
+    }
+  }
+
+  private applyTrigger(positions: Float32Array): void {
+    const center = normalizedHandToWorld(this.currentCommand.position, this.camera.aspect)
+    if (this.currentCommand.trigger === 'BURST') {
+      applyRadialImpulse(
+        positions,
+        this.velocities,
+        center,
+        0.075 + this.currentCommand.intensity * 0.1,
+      )
+      this.energy = 1
+    } else if (this.currentCommand.trigger === 'DIRECTIONAL_IMPULSE' && this.currentCommand.direction) {
+      applyDirectionalImpulse(
+        this.velocities,
+        this.currentCommand.direction,
+        0.06 + this.currentCommand.intensity * 0.11,
+      )
+      this.energy = 0.82
+    }
+  }
+
+  private generateFormation(elapsed: number): void {
+    this.formations.generate(
+      this.currentCommand.effect,
+      this.formationTargets,
+      this.createFormationContext(elapsed),
     )
   }
 
-  private writeFormation(command: GestureCommand, elapsed: number): void {
-    const positionX = (command.position?.x ?? 0) * 1.8
-    const positionY = (command.position?.y ?? 0) * 1.35
-    if (command.gesture === 'FIST') {
-      writeSphereTargets(this.targets, this.particleCount, 1.75)
-    } else if (command.gesture === 'OPEN_PALM') {
-      writeExpandedSphereTargets(this.targets, this.particleCount, 4.1)
-    } else if (command.gesture === 'TWO_HAND_EXPANSION') {
-      writeExpandedSphereTargets(
-        this.targets,
-        this.particleCount,
-        4.35 + command.intensity * 0.85,
-      )
-    } else if (command.gesture === 'INDEX_POINT') {
-      writeVortexTargets(this.targets, this.particleCount, positionX, positionY)
-    } else if (command.gesture === 'PEACE') {
-      writeWaveTargets(this.targets, this.particleCount, elapsed, 0.9)
-    } else if (command.gesture === 'PINCH') {
-      writeImplosionTargets(
-        this.targets,
-        this.particleCount,
-        positionX,
-        positionY,
-        command.intensity,
-      )
-    } else {
-      writeSphereTargets(this.targets, this.particleCount, SPHERE_RADIUS)
+  private requiresSpatialUpdate(): boolean {
+    return this.currentCommand.effect === 'IMPLOSION' ||
+      this.currentCommand.effect === 'VORTEX' ||
+      this.currentCommand.effect === 'ENERGY_BURST'
+  }
+
+  private createFormationContext(elapsed: number): FormationContext {
+    return {
+      count: this.particleCount,
+      time: elapsed,
+      intensity: this.currentCommand.intensity,
+      position: normalizedHandToWorld(this.currentCommand.position, this.camera.aspect),
     }
   }
 
-  private applySwipeImpulse(command: GestureCommand): void {
-    const direction = command.direction
-    if (!direction) return
-    const strength = 0.055 + command.intensity * 0.12
+  private sanitizeCommand(command: ParticleEffectCommand): ParticleEffectCommand {
+    return {
+      ...command,
+      intensity: Number.isFinite(command.intensity) ? clamp01(command.intensity) : 0,
+      position: command.position && Number.isFinite(command.position.x) && Number.isFinite(command.position.y)
+        ? command.position
+        : undefined,
+      direction: command.direction && Number.isFinite(command.direction.x) && Number.isFinite(command.direction.y)
+        ? command.direction
+        : undefined,
+    }
+  }
+
+  private updateParticleStyle(): void {
+    const points = this.points
+    if (!points) return
+    const preset = getEffectPreset(this.currentCommand.effect)
+    const colors = preset.colors.map((color) => new THREE.Color(color))
+    const mixed = new THREE.Color()
+    const colorAttribute = points.geometry.getAttribute('aColor') as THREE.BufferAttribute
+    const sizeAttribute = points.geometry.getAttribute('aSize') as THREE.BufferAttribute
+    const colorArray = colorAttribute.array as Float32Array
+    const sizeArray = sizeAttribute.array as Float32Array
     for (let index = 0; index < this.particleCount; index += 1) {
       const offset = index * 3
-      const variation = 0.72 + ((index * 31) % 47) / 100
-      this.velocities[offset] += direction.x * strength * variation
-      this.velocities[offset + 1] += direction.y * strength * variation
-      this.velocities[offset + 2] += Math.sin(index * 0.17) * strength * 0.18
+      const palettePosition = (index % 197) / 196
+      const scaled = palettePosition * (colors.length - 1)
+      const startIndex = Math.floor(scaled)
+      const endIndex = Math.min(colors.length - 1, startIndex + 1)
+      mixed.copy(colors[startIndex]).lerp(colors[endIndex], scaled - startIndex)
+      colorArray[offset] = mixed.r
+      colorArray[offset + 1] = mixed.g
+      colorArray[offset + 2] = mixed.b
+      sizeArray[index] = (0.072 + ((index * 17) % 23) / 680) * preset.particleSize
     }
+    colorAttribute.needsUpdate = true
+    sizeAttribute.needsUpdate = true
   }
 
   private samplePerformance(delta: number): void {
     this.elapsedFrames += 1
     this.elapsedSampleTime += delta
     if (this.elapsedSampleTime < 1) return
-
     const fps = Math.round(this.elapsedFrames / this.elapsedSampleTime)
     this.lowFpsSamples = fps < LOW_FPS_THRESHOLD
       ? this.lowFpsSamples + 1
       : Math.max(0, this.lowFpsSamples - 1)
-
     if (this.lowFpsSamples >= LOW_FPS_SAMPLE_LIMIT && this.quality === 'high') {
       this.quality = 'balanced'
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25))
       this.createParticles(BALANCED_PARTICLE_COUNT)
       this.resize()
     }
-
     this.onPerformance?.({ fps, particleCount: this.particleCount, quality: this.quality })
     this.elapsedFrames = 0
     this.elapsedSampleTime = 0
+  }
+
+  private handleContextLost = (event: Event): void => {
+    event.preventDefault()
+    this.contextLost = true
+    this.stop()
+  }
+
+  private handleContextRestored = (): void => {
+    this.contextLost = false
+    this.start()
   }
 }

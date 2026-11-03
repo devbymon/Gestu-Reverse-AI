@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import type { RefObject } from 'react'
 import { ParticleEngine } from '../engine/ParticleEngine'
 import type { ParticlePerformance } from '../types/particles'
-import type { GestureCommand } from '../types/gestures'
+import type { ParticleEffectCommand } from '../types/particleEffects'
 
 interface ParticleSceneProps {
-  commandRef: RefObject<GestureCommand>
+  getEffectCommand: () => ParticleEffectCommand
 }
 
-export default function ParticleScene({ commandRef }: ParticleSceneProps) {
+export default function ParticleScene({ getEffectCommand }: ParticleSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [engineError, setEngineError] = useState<string | null>(null)
   const [performance, setPerformance] = useState<ParticlePerformance>({
     fps: 60,
     particleCount: 10_000,
@@ -20,7 +20,15 @@ export default function ParticleScene({ commandRef }: ParticleSceneProps) {
     const container = containerRef.current
     if (!container) return
 
-    const engine = new ParticleEngine(container, setPerformance, () => commandRef.current)
+    let engine: ParticleEngine
+    try {
+      engine = new ParticleEngine(container, setPerformance, getEffectCommand)
+    } catch {
+      const errorTimer = window.setTimeout(() => {
+        setEngineError('WebGL is unavailable. Manual controls and camera tracking remain accessible.')
+      }, 0)
+      return () => window.clearTimeout(errorTimer)
+    }
     const resizeObserver = new ResizeObserver(() => engine.resize())
     const handleVisibility = () => {
       if (document.hidden) engine.stop()
@@ -36,11 +44,12 @@ export default function ParticleScene({ commandRef }: ParticleSceneProps) {
       document.removeEventListener('visibilitychange', handleVisibility)
       engine.dispose()
     }
-  }, [commandRef])
+  }, [getEffectCommand])
 
   return (
     <div className="particle-stage">
       <div ref={containerRef} className="particle-canvas" />
+      {engineError && <div className="particle-error" role="alert">{engineError}</div>}
       <div className="particle-metrics" aria-live="polite">
         <span><strong>{performance.fps}</strong> FPS</span>
         <span><strong>{performance.particleCount.toLocaleString()}</strong> particles</span>

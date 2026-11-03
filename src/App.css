@@ -110,6 +110,22 @@
   display: block;
 }
 
+.particle-error {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  width: min(360px, calc(100% - 48px));
+  padding: 16px;
+  border: 1px solid rgb(244 63 94 / 35%);
+  background: rgb(15 23 42 / 92%);
+  color: #fda4af;
+  font: 9px/1.6 'SFMono-Regular', Consolas, monospace;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+}
+
 .particle-metrics {
   position: absolute;
   z-index: 2;
@@ -254,6 +270,96 @@
 .camera-consent {
   display: block;
 }
+
+.demo-controls {
+  position: absolute;
+  z-index: 3;
+  bottom: 5%;
+  left: clamp(24px, 7vw, 110px);
+  width: min(280px, 28vw);
+  padding: 12px;
+  border: 1px solid rgb(148 163 184 / 16%);
+  background: rgb(8 13 29 / 82%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(14px);
+}
+
+.demo-controls__heading,
+.demo-controls__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+}
+
+.demo-controls__heading div span,
+.demo-controls__heading div strong {
+  display: block;
+}
+
+.demo-controls__heading div span,
+.demo-controls > label {
+  color: #475569;
+  font: 6px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.demo-controls__heading div strong {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.demo-controls__heading > span {
+  padding: 3px 5px;
+  border: 1px solid rgb(0 229 255 / 18%);
+  color: #00e5ff;
+  font: 6px 'SFMono-Regular', Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.demo-controls__heading > .is-manual {
+  border-color: rgb(236 72 153 / 28%);
+  color: #ec4899;
+}
+
+.demo-controls > label {
+  display: block;
+  margin: 10px 0 4px;
+}
+
+.demo-controls select {
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid rgb(148 163 184 / 18%);
+  border-radius: 0;
+  background: #0f172a;
+  color: #e2e8f0;
+  font: 8px 'SFMono-Regular', Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.demo-controls__actions {
+  margin-top: 7px;
+}
+
+.demo-controls button {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid rgb(0 229 255 / 20%);
+  background: rgb(0 229 255 / 5%);
+  color: #94a3b8;
+  cursor: pointer;
+  font: 6px 'SFMono-Regular', Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.demo-controls button:hover:not(:disabled) { color: #00e5ff; }
+.demo-controls button:disabled { cursor: default; opacity: 0.35; }
+.demo-controls button:focus-visible,
+.demo-controls select:focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
 
 .camera-panel__header strong {
   font-size: 10px;
@@ -622,6 +728,13 @@
   .camera-panel {
     right: 24px;
     bottom: 18px;
+    width: min(310px, calc(100% - 48px));
+  }
+
+  .demo-controls {
+    top: 205px;
+    bottom: auto;
+    left: 24px;
     width: min(310px, calc(100% - 48px));
   }
 
