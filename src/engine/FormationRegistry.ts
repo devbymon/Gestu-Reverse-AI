@@ -1,4 +1,5 @@
 import { BurstFormation } from '../formations/BurstFormation'
+import { FalconFormation } from '../formations/FalconFormation'
 import { GalaxyFormation } from '../formations/GalaxyFormation'
 import { HeartFormation } from '../formations/HeartFormation'
 import { ImplosionFormation } from '../formations/ImplosionFormation'
@@ -16,6 +17,7 @@ export class FormationRegistry {
   private readonly formations = new Map<FormationType, ParticleFormation>()
 
   constructor() {
+    this.register(new FalconFormation())
     this.register(new SphereFormation())
     this.register(new GalaxyFormation())
     this.register(new HeartFormation())

@@ -15,7 +15,7 @@ export interface ParticlePerformance {
   quality: 'high' | 'balanced'
 }
 
-export type ParticlePaletteId = 'COSMIC' | 'PLASMA' | 'AURORA' | 'MONOCHROME' | 'CUSTOM'
+export type ParticlePaletteId = 'ULACIT' | 'COSMIC' | 'PLASMA' | 'AURORA' | 'MONOCHROME' | 'CUSTOM'
 
 export interface ParticleSettings {
   particleCount: number
@@ -32,8 +32,8 @@ export const DEFAULT_PARTICLE_SETTINGS: ParticleSettings = {
   particleSize: 1,
   animationSpeed: 1,
   interactionSensitivity: 1,
-  palette: 'COSMIC',
-  customColors: ['#00e5ff', '#2563eb', '#a855f7'],
+  palette: 'ULACIT',
+  customColors: ['#6d28d9', '#f97316', '#22c55e'],
   revision: 0,
 }
 

@@ -2,6 +2,11 @@ import type { EffectPreset, FormationType } from '../types/particleEffects'
 
 export const EFFECT_PRESETS: readonly EffectPreset[] = [
   {
+    id: 'FALCON', name: 'ULACIT Falcon', description: 'Particle falcon resting formation',
+    transitionDuration: 1, particleSize: 1.02, rotationSpeed: 0.045,
+    colors: ['#6d28d9', '#f97316', '#22c55e'],
+  },
+  {
     id: 'SPHERE', name: 'Cosmic Sphere', description: 'Volumetric resting formation',
     transitionDuration: 0.9, particleSize: 1, rotationSpeed: 0.12,
     colors: ['#00e5ff', '#2563eb', '#a855f7'],
@@ -46,5 +51,5 @@ export const EFFECT_PRESETS: readonly EffectPreset[] = [
 const PRESETS_BY_ID = new Map(EFFECT_PRESETS.map((preset) => [preset.id, preset]))
 
 export function getEffectPreset(type: FormationType): EffectPreset {
-  return PRESETS_BY_ID.get(type) ?? EFFECT_PRESETS[0]
+  return PRESETS_BY_ID.get(type) ?? EFFECT_PRESETS[1]
 }
