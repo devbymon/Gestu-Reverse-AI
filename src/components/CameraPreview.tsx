@@ -82,6 +82,12 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
             </div>
           )}
           {isRunning && <span className="camera-live-badge">Live</span>}
+          {state.status === 'no-hands' && (
+            <div className="camera-hand-prompt" role="status">
+              <Icon name="hand" size={16} />
+              <span><strong>Place your hand in frame</strong><small>Keep your fingers visible</small></span>
+            </div>
+          )}
         </div>
 
         <HandTrackingStatus state={state} />
@@ -93,10 +99,10 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
           onClick={isRunning ? disableCamera : () => void enableCamera()}
         >
           <Icon name="camera" size={15} />
-          {isTransitioning ? 'Starting camera…' : isRunning ? 'Disable Camera' : 'Enable Camera'}
+          {isTransitioning ? 'Starting camera…' : isRunning ? 'Turn off camera' : 'Enable Camera'}
         </button>
         <p className="camera-consent">
-          Camera access is explicit. Frames are processed locally and never recorded.
+          Processed on this device · Never recorded
         </p>
       </aside>
     )
