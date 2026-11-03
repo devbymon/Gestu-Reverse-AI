@@ -6,17 +6,12 @@ import type {
   GestureThresholds,
   GestureType,
 } from '../types/gestures'
-import { calculateSnapRatio, normalizedPalmToCommand } from '../utils/gestureGeometry'
+import { normalizedPalmToCommand } from '../utils/gestureGeometry'
 import {
   classifyHandGesture,
   DEFAULT_GESTURE_THRESHOLDS,
 } from '../utils/gestureRecognition'
 import { GestureStabilizer, LandmarkSmoother } from '../utils/gestureSmoothing'
-
-interface SnapContact {
-  contactAt: number | null
-  minimumRatio: number
-}
 
 const EFFECT_NAMES: Record<GestureType, string> = {
   FIST: 'Compact Sphere',
@@ -24,12 +19,10 @@ const EFFECT_NAMES: Record<GestureType, string> = {
   INDEX_POINT: 'Particle Vortex',
   PEACE: 'Particle Wave',
   PINCH: 'Particle Implosion',
-  SNAP: 'Kinetic Push',
+  THREE_FINGERS: 'Kinetic Push',
   TWO_HAND_EXPANSION: 'Dual Energy Expansion',
   UNKNOWN: 'Ambient Sphere',
 }
-
-const SNAP_VISIBLE_MS = 320
 
 function clamp(value: number, minimum = 0, maximum = 1): number {
   return Math.min(maximum, Math.max(minimum, value))
@@ -38,10 +31,6 @@ function clamp(value: number, minimum = 0, maximum = 1): number {
 export class GestureController {
   private readonly smoother = new LandmarkSmoother()
   private readonly stabilizer: GestureStabilizer
-  private readonly snapContacts = new Map<string, SnapContact>()
-  private lastSnapAt = Number.NEGATIVE_INFINITY
-  private snapUntil = Number.NEGATIVE_INFINITY
-  private snapCommand: GestureCommand | null = null
   private readonly thresholds: GestureThresholds
 
   constructor(thresholds: GestureThresholds = DEFAULT_GESTURE_THRESHOLDS) {
@@ -69,36 +58,6 @@ export class GestureController {
       ? 'TWO_HAND_EXPANSION'
       : classifications[0]?.gesture ?? 'UNKNOWN'
     const stabilization = this.stabilizer.update(baseGesture)
-    const snapIntensity = this.detectSnap(frame.hands, frame.timestamp)
-
-    if (
-      !twoOpenHands &&
-      snapIntensity !== null &&
-      frame.timestamp - this.lastSnapAt >= this.thresholds.snapCooldownMs
-    ) {
-      this.lastSnapAt = frame.timestamp
-      this.snapUntil = frame.timestamp + SNAP_VISIBLE_MS
-      this.snapCommand = {
-        gesture: 'SNAP',
-        intensity: snapIntensity,
-        position,
-        timestamp: frame.timestamp,
-      }
-    }
-
-    if (this.snapCommand && frame.timestamp <= this.snapUntil) {
-      return {
-        command: this.snapCommand,
-        state: this.createState(
-          'SNAP',
-          stabilization.candidate,
-          this.snapCommand.intensity,
-          1,
-          hands.length,
-          true,
-        ),
-      }
-    }
 
     const stableGesture = stabilization.stable
     const intensity = this.calculateIntensity(
@@ -129,46 +88,6 @@ export class GestureController {
   reset(): void {
     this.smoother.reset()
     this.stabilizer.reset()
-    this.snapContacts.clear()
-    this.snapCommand = null
-    this.snapUntil = Number.NEGATIVE_INFINITY
-    this.lastSnapAt = Number.NEGATIVE_INFINITY
-  }
-
-  private detectSnap(hands: TrackedHand[], timestamp: number): number | null {
-    let strongestSnap: number | null = null
-    for (const hand of hands) {
-      const key = hand.handedness
-      const ratio = calculateSnapRatio(hand.landmarks)
-      const contact = this.snapContacts.get(key) ?? {
-        contactAt: null,
-        minimumRatio: Number.POSITIVE_INFINITY,
-      }
-      if (ratio <= this.thresholds.snapContactRatio) {
-        contact.contactAt ??= timestamp
-        contact.minimumRatio = Math.min(contact.minimumRatio, ratio)
-      } else if (contact.contactAt !== null) {
-        const elapsed = timestamp - contact.contactAt
-        if (elapsed <= this.thresholds.snapWindowMs && ratio >= this.thresholds.snapReleaseRatio) {
-          const releaseEnergy = clamp(
-            (ratio - this.thresholds.snapReleaseRatio) /
-            Math.max(0.1, 1.35 - this.thresholds.snapReleaseRatio),
-          )
-          const contactEnergy = clamp(
-            1 - contact.minimumRatio / this.thresholds.snapContactRatio,
-          )
-          const intensity = 0.65 + (releaseEnergy * 0.2 + contactEnergy * 0.15)
-          strongestSnap = Math.max(strongestSnap ?? 0, intensity)
-          contact.contactAt = null
-          contact.minimumRatio = Number.POSITIVE_INFINITY
-        } else if (elapsed > this.thresholds.snapWindowMs) {
-          contact.contactAt = null
-          contact.minimumRatio = Number.POSITIVE_INFINITY
-        }
-      }
-      this.snapContacts.set(key, contact)
-    }
-    return strongestSnap
   }
 
   private calculateIntensity(
@@ -189,6 +108,7 @@ export class GestureController {
     if (gesture === 'PEACE') return clamp(0.55 + Math.abs(verticalPosition) * 0.45)
     if (gesture === 'OPEN_PALM') return 0.72
     if (gesture === 'INDEX_POINT') return 0.68
+    if (gesture === 'THREE_FINGERS') return 0.82
     if (gesture === 'FIST') return 0.62
     return 0
   }

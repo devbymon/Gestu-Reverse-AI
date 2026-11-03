@@ -16,9 +16,9 @@ export function useParticleEffects(gestureCommandRef: RefObject<GestureCommand>)
     if (gestureCommand.timestamp === lastGestureTimestampRef.current) return gestureEffectRef.current
     lastGestureTimestampRef.current = gestureCommand.timestamp
 
-    if (gestureCommand.gesture === 'SNAP') {
-      if (lastGestureTypeRef.current !== 'SNAP') triggerIdRef.current += 1
-      lastGestureTypeRef.current = 'SNAP'
+    if (gestureCommand.gesture === 'THREE_FINGERS') {
+      if (lastGestureTypeRef.current !== 'THREE_FINGERS') triggerIdRef.current += 1
+      lastGestureTypeRef.current = 'THREE_FINGERS'
       gestureEffectRef.current = {
         ...gestureEffectRef.current,
         source: 'GESTURE',

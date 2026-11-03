@@ -15,10 +15,6 @@ export const DEFAULT_GESTURE_THRESHOLDS: GestureThresholds = {
   flexionAngleDegrees: 118,
   pinchEnterRatio: 0.38,
   pinchExitRatio: 0.5,
-  snapContactRatio: 0.34,
-  snapReleaseRatio: 0.72,
-  snapWindowMs: 360,
-  snapCooldownMs: 650,
   confirmationFrames: 3,
 }
 
@@ -42,6 +38,14 @@ export function classifyHandGesture(
     return {
       gesture: 'PINCH',
       heuristicScore: Math.min(1, 1 - pinchRatio / thresholds.pinchExitRatio),
+      pinchRatio,
+      extendedFingerCount: extended,
+    }
+  }
+  if (states.index && states.middle && states.ring && !states.pinky) {
+    return {
+      gesture: 'THREE_FINGERS',
+      heuristicScore: 0.9,
       pinchRatio,
       extendedFingerCount: extended,
     }

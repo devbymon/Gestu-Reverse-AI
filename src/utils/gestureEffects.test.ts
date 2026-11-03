@@ -12,8 +12,8 @@ describe('gesture effect mapping', () => {
     expect(getGestureFormation('UNKNOWN')).toBe('SPHERE')
   })
 
-  it('keeps the underlying candidate visible during a transient snap', () => {
-    expect(getGestureFormation('SNAP', 'PEACE')).toBe('WAVE')
+  it('keeps the underlying formation while three fingers trigger push', () => {
+    expect(getGestureFormation('THREE_FINGERS', 'PEACE')).toBe('WAVE')
   })
 
   it('shows the candidate while a gesture is stabilizing', () => {

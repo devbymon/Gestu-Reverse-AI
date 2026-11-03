@@ -9,7 +9,7 @@ import type { GestureType } from '../types/gestures'
 import { calculatePalmPosition } from './landmarkUtils'
 import { classifyHandGesture } from './gestureRecognition'
 
-type HandPose = 'open' | 'fist' | 'index' | 'peace' | 'pinch' | 'unknown'
+type HandPose = 'open' | 'fist' | 'index' | 'peace' | 'three' | 'pinch' | 'unknown'
 
 const FINGERS = [
   [5, 6, 7, 8],
@@ -34,6 +34,7 @@ function createLandmarks(pose: HandPose, scale = 1, shiftX = 0): NormalizedHandL
     fist: [false, false, false, false],
     index: [true, false, false, false],
     peace: [true, true, false, false],
+    three: [true, true, true, false],
     pinch: [true, true, true, true],
     unknown: [true, false, true, false],
   }
@@ -80,20 +81,6 @@ function createHand(
   }
 }
 
-function createSnapHand(contact: boolean): TrackedHand {
-  const hand = createHand('unknown')
-  const landmarks = hand.landmarks.map((landmark) => ({ ...landmark }))
-  const middleTip = landmarks[12]!
-  landmarks[4] = contact
-    ? point(middleTip.x - 0.004, middleTip.y + 0.004)
-    : point(0.18, 0.62)
-  return {
-    ...hand,
-    landmarks,
-    palmPosition: calculatePalmPosition(landmarks),
-  }
-}
-
 function frame(timestamp: number, ...hands: TrackedHand[]): HandTrackingFrame {
   return { timestamp, hands }
 }
@@ -119,6 +106,7 @@ describe('gesture classification', () => {
     ['open', 'OPEN_PALM'],
     ['index', 'INDEX_POINT'],
     ['peace', 'PEACE'],
+    ['three', 'THREE_FINGERS'],
     ['pinch', 'PINCH'],
     ['unknown', 'UNKNOWN'],
   ])('classifies %s landmarks as %s', (pose, expected) => {
@@ -152,31 +140,13 @@ describe('gesture controller', () => {
     expect(stabilize(controller, 'open', 2)).toBe('TWO_HAND_EXPANSION')
   })
 
-  it('emits one transient snap and respects its cooldown', () => {
+  it('recognizes three raised fingers as a stable push gesture', () => {
     const controller = new GestureController()
-    controller.process(frame(0, createSnapHand(true)))
-    const snap = controller.process(frame(120, createSnapHand(false)))
-    expect(snap.command.gesture).toBe('SNAP')
-    expect(snap.state.isTransient).toBe(true)
-    expect(snap.command.direction).toBeUndefined()
-
-    const heldSnap = controller.process(frame(200, createSnapHand(false)))
-    expect(heldSnap.command.timestamp).toBe(snap.command.timestamp)
-
-    controller.process(frame(500, createSnapHand(true)))
-    const cooldownSnap = controller.process(frame(560, createSnapHand(false)))
-    expect(cooldownSnap.command.gesture).not.toBe('SNAP')
-
-    controller.process(frame(800, createSnapHand(true)))
-    const nextSnap = controller.process(frame(880, createSnapHand(false)))
-    expect(nextSnap.command.gesture).toBe('SNAP')
-  })
-
-  it('does not detect a snap when the fingers separate too slowly', () => {
-    const controller = new GestureController()
-    controller.process(frame(0, createSnapHand(true)))
-    const slowRelease = controller.process(frame(500, createSnapHand(false)))
-    expect(slowRelease.command.gesture).not.toBe('SNAP')
+    expect(stabilize(controller, 'three')).toBe('THREE_FINGERS')
+    const held = controller.process(frame(160, createHand('three')))
+    expect(held.command.gesture).toBe('THREE_FINGERS')
+    expect(held.command.intensity).toBe(0.82)
+    expect(held.state.isTransient).toBe(false)
   })
 
   it('resets immediately when tracking is lost', () => {
