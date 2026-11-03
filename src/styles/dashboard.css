@@ -84,15 +84,37 @@
 .camera-button svg { margin-right: 6px; vertical-align: middle; }
 .camera-button--stop { border-color: rgb(251 113 133 / 28%); background: rgb(251 113 133 / 6%); color: #fda4af; }
 .camera-consent { margin: 8px 0 0; color: var(--muted); font-size: 8px; line-height: 1.45; }
-.gesture-module .gesture-indicator { min-height: 72px; }
+.gesture-module .gesture-indicator { min-height: 118px; }
 .gesture-indicator__topline { display: flex; justify-content: space-between; }
-.gesture-indicator span { color: var(--muted); font-size: 8px; text-transform: uppercase; }
+.gesture-indicator span { color: var(--muted); font-size: 9px; }
 .gesture-indicator__topline .is-stable { color: var(--green); }
-.gesture-indicator > strong { display: block; margin: 7px 0 3px; font: 500 12px var(--mono); color: var(--cyan); }
-.gesture-effect { display: block; }
-.gesture-meter { height: 2px; margin-top: 9px; background: #182033; }
-.gesture-meter span { display: block; height: 100%; background: linear-gradient(90deg,var(--cyan),var(--violet)); }
-.gesture-debug { margin-top: 8px; color: var(--muted); font: 7px var(--mono); }
+.gesture-indicator__result { margin: 10px 0 12px; display: flex; align-items: center; gap: 10px; }
+.gesture-indicator__result > div { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.gesture-indicator__result strong { color: var(--text); font-size: 14px; font-weight: 620; }
+.gesture-indicator__result span { color: var(--gesture-color); }
+.gesture-indicator__symbol { width: 35px; height: 35px; border: 1px solid color-mix(in srgb,var(--gesture-color) 40%,transparent); border-radius: 9px; background: color-mix(in srgb,var(--gesture-color) 9%,transparent); display: grid; place-items: center; font-size: 19px !important; }
+.gesture-meter { height: 5px; overflow: hidden; border-radius: 999px; background: #1b2230; }
+.gesture-meter span { display: block; height: 100%; border-radius: inherit; background: var(--gesture-color); box-shadow: 0 0 10px color-mix(in srgb,var(--gesture-color) 45%,transparent); transition: width .12s linear,background-color .2s ease; }
+.gesture-meter__label { margin-top: 6px; display: flex; justify-content: space-between; }
+.gesture-debug { margin: 10px 0 0; padding-top: 9px; border-top: 1px solid var(--line); color: var(--muted); font: 7px var(--mono); display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.gesture-debug div { min-width: 0; }
+.gesture-debug dt { margin-bottom: 2px; color: #64748b; }
+.gesture-debug dd { margin: 0; overflow: hidden; color: #9aa7b9; text-overflow: ellipsis; white-space: nowrap; }
+
+.gesture-map { position: absolute; z-index: 4; top: 28px; left: 28px; width: 250px; padding: 15px 16px; border: 1px solid var(--line); border-radius: 12px; background: rgb(8 10 17 / 86%); box-shadow: 0 16px 45px rgb(0 0 0 / 24%); }
+.gesture-map__heading { margin-bottom: 9px; padding-bottom: 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+.gesture-map__heading > span { color: #dce5f0; font-size: 11px; font-weight: 620; }
+.gesture-map__heading small { color: var(--muted); font: 8px var(--mono); }
+.gesture-map__rows { display: grid; }
+.gesture-map__row { position: relative; min-height: 34px; padding: 5px 5px; border-radius: 7px; display: grid; grid-template-columns: 27px 72px 18px 1fr; align-items: center; color: #8c96a7; transition: color .18s ease,background-color .18s ease; }
+.gesture-map__row::before { content: ''; position: absolute; left: -16px; width: 2px; height: 18px; border-radius: 2px; background: transparent; }
+.gesture-map__row strong { font-size: 10px; font-weight: 650; letter-spacing: .05em; }
+.gesture-map__row > span:last-child { font: 9px var(--mono); }
+.gesture-map__symbol { font-size: 16px; filter: grayscale(.25); }
+.gesture-map__arrow { color: #475569; }
+.gesture-map__row.is-active { color: #f8fafc; background: color-mix(in srgb,var(--gesture-color) 10%,transparent); }
+.gesture-map__row.is-active::before { background: var(--gesture-color); }
+.gesture-map__row.is-active .gesture-map__arrow, .gesture-map__row.is-active > span:last-child { color: var(--gesture-color); }
 
 .status-bar { z-index: 25; display: flex; align-items: center; gap: 24px; padding: 0 16px; border-top: 1px solid var(--line); background: #070a12; color: var(--muted); font: 8px var(--mono); text-transform: uppercase; }
 .status-bar span { white-space: nowrap; }

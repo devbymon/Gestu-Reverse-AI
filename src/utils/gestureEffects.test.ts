@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getGestureFormation } from './gestureEffects'
+import { getDisplayedGesture } from './gesturePresentation'
 
 describe('gesture effect mapping', () => {
   it('maps stable gestures to the formations consumed by the engine', () => {
@@ -12,5 +13,10 @@ describe('gesture effect mapping', () => {
 
   it('keeps the underlying candidate visible during a transient swipe', () => {
     expect(getGestureFormation('SWIPE', 'PEACE')).toBe('WAVE')
+  })
+
+  it('shows the candidate while a gesture is stabilizing', () => {
+    expect(getDisplayedGesture('UNKNOWN', 'PINCH')).toBe('PINCH')
+    expect(getDisplayedGesture('FIST', 'OPEN_PALM')).toBe('FIST')
   })
 })

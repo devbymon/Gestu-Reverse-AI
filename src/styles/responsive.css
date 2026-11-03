@@ -6,6 +6,7 @@
   .app-sidebar.is-open { transform: translateX(0); }
   .sidebar-heading .icon-button { display: inline-grid; }
   .sidebar-backdrop { position: absolute; z-index: 15; inset: 0; display: block; border: 0; background: rgb(2 4 10 / 62%); }
+  .gesture-map { width: 225px; }
 }
 
 @media (max-width: 700px) {
@@ -26,6 +27,13 @@
   .welcome-actions { flex-direction: column; }
   .presentation-controls { top: 13px; right: 13px; }
   .presentation-controls button:first-child { display: none; }
+  .gesture-map { top: 12px; left: 12px; width: 185px; padding: 10px; }
+  .gesture-map__heading { margin-bottom: 5px; padding-bottom: 7px; }
+  .gesture-map__heading small { display: none; }
+  .gesture-map__row { min-height: 27px; padding: 3px; grid-template-columns: 23px 60px 13px 1fr; }
+  .gesture-map__row::before { left: -10px; height: 15px; }
+  .gesture-map__row strong, .gesture-map__row > span:last-child { font-size: 8px; }
+  .gesture-map__symbol { font-size: 13px; }
   .dashboard-app.is-presentation .app-sidebar { right: 13px; bottom: 13px; width: min(260px,calc(100% - 26px)); max-height: 245px; overflow-y: auto; }
   .dashboard-app.is-presentation .camera-viewport { height: auto; }
 }

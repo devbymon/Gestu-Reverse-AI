@@ -8,6 +8,7 @@ import ViewportOverlay from './components/layout/ViewportOverlay'
 import HelpPanel from './components/help/HelpPanel'
 import WelcomeDialog from './components/onboarding/WelcomeDialog'
 import PresentationControls from './components/presentation/PresentationControls'
+import GestureGuide from './components/gestures/GestureGuide'
 import { useDashboardState } from './hooks/useDashboardState'
 import { useGestureRecognition } from './hooks/useGestureRecognition'
 import { useParticleEffects } from './hooks/useParticleEffects'
@@ -83,6 +84,7 @@ function App() {
             getEffectCommand={getEffectCommand} getSettings={getSettings}
             onPerformance={handlePerformance} onEngineError={handleEngineError}
           />
+          <GestureGuide state={gestureState} />
           <ViewportOverlay
             formation={activeEffect} gesture={gestureState}
             particleCount={performance?.particleCount ?? null} compact={presentationMode}

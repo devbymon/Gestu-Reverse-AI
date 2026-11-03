@@ -9,6 +9,7 @@ The particle engine, hand tracking, gesture recognition, and advanced effects re
 - A responsive creative-technology workspace with a particle-first viewport, control sidebar, header, and live status bar.
 - Gesture-driven formation selection with real controls for particle count, size, animation speed, sensitivity, and palettes.
 - Camera preview and landmark visibility controls that do not stop the underlying tracking session.
+- A color-coded gesture stage and on-canvas gesture-to-effect reference that follow the real recognition state.
 - Live measured FPS, particle count, renderer state, camera state, and MediaPipe state.
 - First-use onboarding, a reusable gesture guide, fullscreen support, and an in-app presentation mode.
 - Keyboard focus states, accessible labels, reduced decorative motion, and desktop/tablet/mobile layouts.
