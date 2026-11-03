@@ -1,41 +1,41 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DashboardVisibility } from '../types/dashboard'
-import { DEFAULT_PARTICLE_SETTINGS } from '../types/particles'
-
-function isFirstVisit(): boolean {
-  if (typeof window === 'undefined') return true
-  try {
-    return window.localStorage.getItem('gestu-onboarding-complete') !== 'true'
-  } catch {
-    return true
-  }
-}
+import type { ParticleSettings } from '../types/particles'
+import { createDefaultParticleSettings, normalizeParticleSettings } from '../utils/particleSettings'
 
 const INITIAL_VISIBILITY: DashboardVisibility = {
   help: false,
-  welcome: isFirstVisit(),
+  welcome: true,
 }
 
 export function useDashboardState() {
+  const [settings, setSettings] = useState<ParticleSettings>(() => createDefaultParticleSettings())
+  const settingsRef = useRef(settings)
   const [visibility, setVisibility] = useState(INITIAL_VISIBILITY)
-  const getSettings = useCallback(() => DEFAULT_PARTICLE_SETTINGS, [])
+  useEffect(() => { settingsRef.current = settings }, [settings])
+  const getSettings = useCallback(() => settingsRef.current, [])
+
+  const updateSettings = useCallback((changes: Partial<Omit<ParticleSettings, 'revision'>>) => {
+    setSettings((current) => normalizeParticleSettings({
+      ...current,
+      ...changes,
+      revision: current.revision + 1,
+    }))
+  }, [])
 
   const setVisible = useCallback((key: keyof DashboardVisibility, value: boolean) => {
     setVisibility((current) => ({ ...current, [key]: value }))
   }, [])
 
   const dismissWelcome = useCallback(() => {
-    try {
-      window.localStorage.setItem('gestu-onboarding-complete', 'true')
-    } catch {
-      // The experience still works when storage is blocked.
-    }
     setVisible('welcome', false)
   }, [setVisible])
 
   return {
+    settings,
     visibility,
     getSettings,
+    updateSettings,
     setVisible,
     dismissWelcome,
   }

@@ -343,7 +343,9 @@ export class ParticleEngine {
     if (!points) return
     const preset = getEffectPreset(this.currentCommand.effect)
     const palette = getParticlePalette(this.settings.palette)
-    const paletteColors = this.settings.palette === 'COSMIC' ? preset.colors : palette.colors
+    const paletteColors = this.settings.palette === 'CUSTOM'
+      ? this.settings.customColors
+      : palette.colors
     const colors = paletteColors.map((color) => new THREE.Color(color))
     const mixed = new THREE.Color()
     const colorAttribute = points.geometry.getAttribute('aColor') as THREE.BufferAttribute
@@ -374,7 +376,8 @@ export class ParticleEngine {
     const nextCount = Math.round(Math.min(15_000, Math.max(3_000, incoming.particleCount)) / 500) * 500
     const countChanged = nextCount !== this.particleCount
     const styleChanged = incoming.particleSize !== this.settings.particleSize ||
-      incoming.palette !== this.settings.palette
+      incoming.palette !== this.settings.palette ||
+      incoming.customColors.join() !== this.settings.customColors.join()
     this.settings = {
       ...incoming,
       particleCount: nextCount,

@@ -6,12 +6,14 @@ An immersive React and Three.js experiment for controlling a real-time 3D partic
 
 The particle engine, hand tracking, gesture recognition, and advanced effects remain intact. Phase 5 adds:
 
-- A responsive particle-first viewport that restores the original “A universe waiting for you” introduction.
+- A two-step introduction—“Programmed, engineered, and waiting for you”—before camera activation.
 - Gesture-driven formation selection without competing manual appearance controls.
 - A floating Phase 2-style camera with landmarks, tracking state, and a color-coded gesture stage.
+- A live Gesture Map plus a compact color studio with presets and unrestricted custom colors.
+- Pastel orange landmarks for the left hand and violet landmarks for the right hand.
 - Open-palm swipe detection uses raw palm motion for responsiveness while continuous gesture classification stays smoothed.
 - Live measured FPS, particle count, renderer state, camera state, and MediaPipe state.
-- First-use onboarding, a reusable gesture guide, fullscreen support, and an in-app presentation mode.
+- Launch onboarding, a reusable gesture guide, fullscreen support, and an in-app presentation mode.
 - Keyboard focus states, accessible labels, reduced decorative motion, and desktop/tablet/mobile layouts.
 - No additional runtime dependencies and no automatic camera activation.
 
@@ -41,6 +43,7 @@ Then open the local URL printed by Vite.
 7. Swipe once, verify the directional impulse, and confirm it does not repeatedly fire during cooldown.
 8. Exercise the supported gestures and confirm each transition starts from the currently visible positions.
 9. Select **Disable Camera** and confirm that the browser camera indicator turns off.
+10. Open **Colors**, try a preset and custom colors, and confirm particles update without restarting WebGL.
 
 Physical camera and one/two-hand detection must be validated manually because they require a real camera and browser permission.
 
@@ -63,9 +66,11 @@ src/
 │   ├── HandLandmarkOverlay.tsx Canvas 2D hand skeleton rendering
 │   ├── HandTrackingStatus.tsx  Model and tracking status
 │   ├── ParticleScene.tsx       Particle lifecycle and performance bridge
+│   ├── controls/               Compact color studio
+│   ├── gestures/               Live gesture-to-effect map
 │   ├── help/                   Reopenable gesture and usage guide
 │   ├── layout/                 Header, viewport overlay, and status bar
-│   ├── onboarding/             First-use camera/preview choice
+│   ├── onboarding/             Introduction and explicit camera choice
 │   └── presentation/           Essential presentation-mode actions
 ├── engine/
 │   ├── EffectPresets.ts         Visual and transition configurations
@@ -88,7 +93,7 @@ src/
 │   ├── useGestureRecognition.ts Gesture controller bridge and UI throttling
 │   ├── useParticleEffects.ts    Gesture-to-effect command bridge
 │   ├── useHandTracking.ts       Camera and inference lifecycle
-│   ├── useDashboardState.ts     Dialog visibility and engine defaults
+│   ├── useDashboardState.ts     Dialog visibility and live color settings
 │   └── usePresentationMode.ts   Fullscreen and presentation state
 ├── services/
 │   ├── gestureController.ts     Temporal classification and command generation

@@ -7,6 +7,8 @@ import ViewportOverlay from './components/layout/ViewportOverlay'
 import HelpPanel from './components/help/HelpPanel'
 import WelcomeDialog from './components/onboarding/WelcomeDialog'
 import PresentationControls from './components/presentation/PresentationControls'
+import GestureGuide from './components/gestures/GestureGuide'
+import ColorDock from './components/controls/ColorDock'
 import { useDashboardState } from './hooks/useDashboardState'
 import { useGestureRecognition } from './hooks/useGestureRecognition'
 import { useParticleEffects } from './hooks/useParticleEffects'
@@ -31,7 +33,7 @@ function App() {
   const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
   const particleEffects = useParticleEffects(commandRef)
   const activeEffect = getGestureFormation(gestureState.gesture, gestureState.candidate)
-  const { visibility, getSettings, setVisible, dismissWelcome } = dashboard
+  const { settings, visibility, getSettings, updateSettings, setVisible, dismissWelcome } = dashboard
   const { presentationMode, requestFullscreen, enterPresentation, exitPresentation } = presentation
   const { getEffectCommand } = particleEffects
 
@@ -74,11 +76,7 @@ function App() {
             getEffectCommand={getEffectCommand} getSettings={getSettings}
             onPerformance={handlePerformance} onEngineError={handleEngineError}
           />
-          <div className="hero-copy">
-            <span className="hero-index">01 — PARTICLE ENGINE</span>
-            <h1>A universe<br />waiting for <em>you.</em></h1>
-            <p>Ten thousand points of light, suspended in motion and prepared for real-time gestural input.</p>
-          </div>
+          {!visibility.welcome && <GestureGuide state={gestureState} />}
           <ViewportOverlay
             formation={activeEffect} gesture={gestureState}
             particleCount={performance?.particleCount ?? null} compact={presentationMode}
@@ -89,17 +87,20 @@ function App() {
               onHelp={() => setVisible('help', true)}
             />
           )}
-          <CameraPreview
-            ref={cameraRef}
-            gestureState={gestureState}
-            onTrackingFrame={processFrame}
-            onTrackingReset={resetGestures}
-            onStateChange={handleTrackingState}
-          />
+          {!visibility.welcome && <ColorDock settings={settings} onChange={updateSettings} />}
+          <div className={`system-camera ${visibility.welcome ? 'is-gated' : ''}`}>
+            <CameraPreview
+              ref={cameraRef}
+              gestureState={gestureState}
+              onTrackingFrame={processFrame}
+              onTrackingReset={resetGestures}
+              onStateChange={handleTrackingState}
+            />
+          </div>
         </section>
       </div>
       <StatusBar performance={performance} tracking={trackingState} engineError={engineError} />
-      <WelcomeDialog open={visibility.welcome} onStartCamera={startCamera} onExploreDemo={exploreDemo} onClose={dismissWelcome} />
+      <WelcomeDialog open={visibility.welcome} onStartCamera={startCamera} onContinueWithoutCamera={exploreDemo} />
       <HelpPanel open={visibility.help} onClose={() => setVisible('help', false)} />
     </main>
   )

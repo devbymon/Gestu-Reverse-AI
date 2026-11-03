@@ -1,31 +1,32 @@
+import { useState } from 'react'
 import Icon from '../ui/Icon'
 
 interface WelcomeDialogProps {
   open: boolean
   onStartCamera: () => void
-  onExploreDemo: () => void
-  onClose: () => void
+  onContinueWithoutCamera: () => void
 }
 
-export default function WelcomeDialog({ open, onStartCamera, onExploreDemo, onClose }: WelcomeDialogProps) {
+export default function WelcomeDialog({ open, onStartCamera, onContinueWithoutCamera }: WelcomeDialogProps) {
+  const [cameraStep, setCameraStep] = useState(false)
   if (!open) return null
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section className="welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-        <button className="icon-button modal-close" type="button" onClick={onClose} aria-label="Close welcome dialog">
-          <Icon name="close" />
-        </button>
-        <div className="welcome-orbit" aria-hidden="true"><span /></div>
-        <span className="dialog-kicker">Interactive particle laboratory</span>
-        <h1 id="welcome-title">Welcome to<br /><em>Gestu Reverse AI.</em></h1>
-        <p>Control thousands of particles using your hands, or watch the ambient particle universe without a camera.</p>
-        <div className="welcome-actions">
-          <button className="primary-button" type="button" onClick={onStartCamera}>
-            <Icon name="camera" /> Start with camera
-          </button>
-          <button className="secondary-button" type="button" onClick={onExploreDemo}>Explore without camera</button>
-        </div>
-        <small>Camera access is always optional. Video frames never leave your device.</small>
+    <div className={`experience-gate ${cameraStep ? 'is-camera-step' : ''}`} role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+      <div className="experience-gate__progress" aria-label="Introduction progress"><span className="is-active">01</span><i /><span className={cameraStep ? 'is-active' : ''}>02</span></div>
+      <section className="experience-intro">
+        <div className="experience-orbit" aria-hidden="true"><i /><span /></div>
+        <span className="dialog-kicker">Gestu Reverse AI · Interactive particle system</span>
+        <h1 id="welcome-title">Programmed,<br />engineered, and<br /><em>waiting for you.</em></h1>
+        <p>An AI-powered particle universe that translates local hand gestures into formations, motion, and light—directly in your browser.</p>
+        {!cameraStep && <button className="experience-enter" type="button" onClick={() => setCameraStep(true)}>Enter the experience <span aria-hidden="true">→</span></button>}
+      </section>
+      <section className="camera-access" aria-hidden={!cameraStep}>
+        <span className="camera-access__icon"><Icon name="camera" size={22} /></span>
+        <span className="dialog-kicker">Step 02 · Camera access</span>
+        <h2>Bring the universe<br />to your hands.</h2>
+        <p>Enable your camera to track up to two hands. Frames stay on this device and are never recorded or uploaded.</p>
+        <button className="primary-button" type="button" onClick={onStartCamera}><Icon name="camera" /> Enable camera & start</button>
+        <button className="camera-access__skip" type="button" onClick={onContinueWithoutCamera}>Continue without camera</button>
       </section>
     </div>
   )

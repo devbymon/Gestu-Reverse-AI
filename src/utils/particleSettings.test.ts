@@ -23,4 +23,13 @@ describe('particle settings', () => {
     expect(settings).toEqual({ ...DEFAULT_PARTICLE_SETTINGS, revision: 4 })
     expect(settings).not.toBe(DEFAULT_PARTICLE_SETTINGS)
   })
+
+  it('keeps valid custom colors and replaces invalid values safely', () => {
+    const settings = normalizeParticleSettings({
+      ...DEFAULT_PARTICLE_SETTINGS,
+      palette: 'CUSTOM',
+      customColors: ['#123456', 'invalid', '#abcdef'],
+    })
+    expect(settings.customColors).toEqual(['#123456', '#2563eb', '#abcdef'])
+  })
 })

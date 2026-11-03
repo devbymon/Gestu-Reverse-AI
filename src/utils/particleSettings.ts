@@ -8,6 +8,9 @@ export function normalizeParticleSettings(settings: ParticleSettings): ParticleS
     particleSize: Math.min(1.8, Math.max(0.6, settings.particleSize)),
     animationSpeed: Math.min(1.8, Math.max(0.4, settings.animationSpeed)),
     interactionSensitivity: Math.min(1.5, Math.max(0.5, settings.interactionSensitivity)),
+    customColors: settings.customColors.map((color, index) => (
+      /^#[0-9a-f]{6}$/i.test(color) ? color : DEFAULT_PARTICLE_SETTINGS.customColors[index]
+    )) as [string, string, string],
   }
 }
 

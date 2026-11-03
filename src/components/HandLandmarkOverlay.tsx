@@ -14,8 +14,8 @@ export interface HandLandmarkOverlayHandle {
 }
 
 const HAND_COLORS = {
-  Left: '#00e5ff',
-  Right: '#a855f7',
+  Left: '#f2a66f',
+  Right: '#a78bfa',
   Unknown: '#2563eb',
 } as const
 
