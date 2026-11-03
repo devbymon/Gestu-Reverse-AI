@@ -169,7 +169,7 @@
   z-index: 2;
   top: 50%;
   left: clamp(24px, 7vw, 110px);
-  width: min(410px, 35vw);
+  width: min(380px, 31vw);
   transform: translateY(-50%);
   pointer-events: none;
 }
@@ -181,7 +181,7 @@
 
 .hero-copy h2 {
   margin: 17px 0 22px;
-  font-size: clamp(42px, 5.3vw, 78px);
+  font-size: clamp(38px, 4.5vw, 66px);
   font-weight: 300;
   line-height: 0.93;
   letter-spacing: -0.055em;
@@ -202,6 +202,293 @@
   color: #64748b;
   font-size: 11px;
   line-height: 1.8;
+}
+
+.camera-panel {
+  position: absolute;
+  z-index: 3;
+  right: clamp(24px, 5vw, 72px);
+  bottom: 5%;
+  width: clamp(280px, 24vw, 350px);
+  padding: 13px;
+  border: 1px solid rgb(148 163 184 / 18%);
+  background: rgb(8 13 29 / 88%);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 45%);
+  backdrop-filter: blur(18px);
+}
+
+.camera-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgb(0 229 255 / 22%), transparent 22%, transparent 78%, rgb(168 85 247 / 18%));
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+.camera-panel__header,
+.camera-panel__header > div,
+.tracking-status,
+.camera-button {
+  display: flex;
+  align-items: center;
+}
+
+.camera-panel__header {
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.camera-panel__header > div {
+  gap: 9px;
+}
+
+.camera-panel__header strong,
+.camera-panel__header span,
+.tracking-status strong,
+.tracking-status span,
+.camera-placeholder span,
+.camera-consent {
+  display: block;
+}
+
+.camera-panel__header strong {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.camera-panel__header div span,
+.tracking-status div span {
+  margin-top: 2px;
+  color: #64748b;
+  font: 7px/1.4 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.camera-panel__index {
+  display: grid !important;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid rgb(0 229 255 / 28%);
+  color: #00e5ff !important;
+  font: 8px 'SFMono-Regular', Consolas, monospace !important;
+}
+
+.camera-panel__privacy {
+  color: #00e5ff;
+  font: 7px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.08em;
+}
+
+.camera-viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgb(148 163 184 / 15%);
+  background:
+    linear-gradient(rgb(0 229 255 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(0 229 255 / 3%) 1px, transparent 1px),
+    #050510;
+  background-size: 22px 22px;
+}
+
+.camera-video,
+.landmark-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.camera-video {
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.landmark-overlay {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.camera-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  background: rgb(5 5 16 / 74%);
+  text-align: center;
+}
+
+.camera-placeholder strong {
+  margin-top: 14px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.camera-placeholder > span:last-child {
+  margin-top: 5px;
+  color: #475569;
+  font: 7px 'SFMono-Regular', Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.camera-reticle {
+  position: relative;
+  width: 39px;
+  height: 39px;
+  border: 1px solid rgb(0 229 255 / 24%);
+  border-radius: 50%;
+}
+
+.camera-reticle::before,
+.camera-reticle::after,
+.camera-reticle i {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  background: #00e5ff;
+  transform: translate(-50%, -50%);
+}
+
+.camera-reticle::before { width: 55px; height: 1px; opacity: 0.22; }
+.camera-reticle::after { width: 1px; height: 55px; opacity: 0.22; }
+.camera-reticle i { width: 5px; height: 5px; border-radius: 50%; box-shadow: 0 0 12px #00e5ff; }
+
+.camera-live-badge {
+  position: absolute;
+  z-index: 3;
+  top: 9px;
+  left: 9px;
+  padding: 4px 6px;
+  background: rgb(5 5 16 / 78%);
+  color: #00e5ff;
+  font: 7px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.12em;
+}
+
+.camera-live-badge::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 7px #00e5ff;
+}
+
+.tracking-status {
+  min-height: 42px;
+  gap: 9px;
+  border-bottom: 1px solid rgb(148 163 184 / 10%);
+}
+
+.tracking-status__signal {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #475569;
+}
+
+.tracking-status__signal--active {
+  background: #00e5ff;
+  box-shadow: 0 0 9px #00e5ff;
+}
+
+.tracking-status__signal--no-hands,
+.tracking-status__signal--initializing,
+.tracking-status__signal--requesting-permission {
+  background: #2563eb;
+  box-shadow: 0 0 8px #2563eb;
+}
+
+.tracking-status__signal--error {
+  background: #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
+}
+
+.tracking-status div {
+  min-width: 0;
+  flex: 1;
+}
+
+.tracking-status strong {
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.tracking-status div span {
+  overflow: hidden;
+  max-width: 185px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-chip {
+  padding: 3px 5px;
+  border: 1px solid rgb(148 163 184 / 14%);
+  color: #64748b;
+  font: 6px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.model-chip--ready {
+  border-color: rgb(0 229 255 / 22%);
+  color: #00e5ff;
+}
+
+.model-chip--error { color: #fb7185; }
+
+.camera-button {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border: 1px solid rgb(0 229 255 / 35%);
+  background: rgb(0 229 255 / 7%);
+  color: #dffaff;
+  cursor: pointer;
+  font: 8px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.camera-button:hover:not(:disabled) { background: rgb(0 229 255 / 13%); }
+.camera-button:focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
+.camera-button:disabled { cursor: wait; opacity: 0.55; }
+.camera-button--stop { border-color: rgb(168 85 247 / 35%); background: rgb(168 85 247 / 7%); }
+
+.camera-button > span {
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.camera-button--stop > span { border-radius: 0; background: currentColor; }
+
+.camera-consent {
+  margin: 8px 2px 0;
+  color: #475569;
+  font: 6px/1.5 'SFMono-Regular', Consolas, monospace;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .footer {
@@ -234,7 +521,8 @@
   }
 
   .particle-stage {
-    top: 130px;
+    top: 100px;
+    bottom: 300px;
   }
 
   .hero-copy {
@@ -246,6 +534,12 @@
   .hero-copy h2 {
     margin: 10px 0;
     font-size: 40px;
+  }
+
+  .camera-panel {
+    right: 24px;
+    bottom: 18px;
+    width: min(310px, calc(100% - 48px));
   }
 
   .hero-copy p {
