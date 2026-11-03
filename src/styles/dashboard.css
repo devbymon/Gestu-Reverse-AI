@@ -229,3 +229,7 @@
 .camera-gate__panel h2 { margin: 11px 0 16px; font-size: clamp(32px,3.5vw,50px); font-weight: 340; line-height: 1; letter-spacing: -.045em; }
 .camera-gate__panel p { margin: 0 0 24px; color: var(--muted); font-size: 11px; line-height: 1.75; }
 .camera-gate__panel .primary-button { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.camera-gate__panel .primary-button:disabled { cursor: wait; opacity: .68; }
+.camera-permission-alert { margin: -7px 0 16px; padding: 11px 12px; border: 1px solid rgb(251 113 133 / 28%); border-radius: 9px; background: rgb(251 113 133 / 6%); }
+.camera-permission-alert strong { color: #fda4af; font-size: 9px; }
+.camera-permission-alert p { margin: 4px 0 0; color: #a8b3c5; font-size: 8px; line-height: 1.55; }

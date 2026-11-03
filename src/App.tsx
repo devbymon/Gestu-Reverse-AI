@@ -106,7 +106,13 @@ function App() {
         </section>
       </div>
       <StatusBar performance={performance} tracking={trackingState} engineError={engineError} />
-      <WelcomeDialog open={visibility.welcome} onStartCamera={startCamera} onContinueWithoutCamera={exploreDemo} />
+      <WelcomeDialog
+        open={visibility.welcome}
+        cameraStatus={trackingState.status}
+        cameraError={trackingState.error}
+        onStartCamera={startCamera}
+        onContinueWithoutCamera={exploreDemo}
+      />
       <HelpPanel open={visibility.help} onClose={() => setVisible('help', false)} />
     </main>
   )
