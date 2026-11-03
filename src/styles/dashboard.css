@@ -110,10 +110,10 @@
 .camera-reticle { position: relative; width: 31px; height: 31px; margin-bottom: 3px; border: 1px solid rgb(34 211 238 / 30%); border-radius: 50%; }
 .camera-reticle i { position: absolute; inset: 9px; border: 1px solid var(--cyan); transform: rotate(45deg); }
 .camera-live-badge { position: absolute; top: 7px; left: 7px; padding: 3px 6px; border-radius: 3px; background: rgb(5 7 16 / 78%); color: var(--green); font: 7px var(--mono); text-transform: uppercase; }
-.camera-hand-prompt { position: absolute; right: 10px; bottom: 10px; left: 10px; min-height: 44px; padding: 8px 10px; border: 1px solid rgb(255 255 255 / 12%); border-radius: 10px; background: rgb(5 7 16 / 78%); backdrop-filter: blur(8px); color: var(--violet); display: flex; align-items: center; gap: 9px; }
+.camera-hand-prompt { position: absolute; top: 8px; right: 8px; min-height: 30px; max-width: 156px; padding: 5px 8px; border: 1px solid rgb(255 255 255 / 12%); border-radius: 8px; background: rgb(5 7 16 / 78%); backdrop-filter: blur(8px); color: var(--violet); display: flex; align-items: center; gap: 6px; }
 .camera-hand-prompt > span { display: flex; flex-direction: column; gap: 2px; }
-.camera-hand-prompt strong { color: #eef2ff; font-size: 9px; font-weight: 600; }
-.camera-hand-prompt small { color: #94a3b8; font-size: 7px; }
+.camera-hand-prompt strong { color: #eef2ff; font-size: 7px; font-weight: 600; white-space: nowrap; }
+.camera-hand-prompt small { display: none; }
 .privacy-chip { padding: 3px 5px; border: 1px solid rgb(52 211 153 / 24%); border-radius: 3px; color: var(--green) !important; }
 .tracking-status { margin: 9px 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: rgb(255 255 255 / 2%); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; color: var(--muted); font-size: 8px; }
 .tracking-status--no-hands { border-color: rgb(52 211 153 / 17%); background: rgb(52 211 153 / 3%); }
@@ -128,7 +128,7 @@
 .camera-visibility-controls button { min-height: 34px; border: 1px solid var(--line); border-radius: 8px; background: #111520; color: #a8b3c5; cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .camera-button { width: 100%; min-height: 40px; margin-top: 10px; border: 1px solid #3f5262; border-radius: 9px; background: #16202a; color: #c7edf2; cursor: pointer; font-size: 10px; }
 .camera-button svg { margin-right: 6px; vertical-align: middle; }
-.camera-button--stop { width: auto; min-height: 32px; margin: 9px 0 0 auto; padding: 0 11px; border-color: var(--line); background: transparent; color: #94a3b8; display: block; }
+.camera-button--stop { width: 100%; min-height: 40px; margin: 10px 0 0; padding: 0 14px; border-color: var(--line); background: transparent; color: #94a3b8; display: block; }
 .camera-button--stop:hover { border-color: rgb(251 113 133 / 35%); color: #fda4af; }
 .camera-consent { margin: 8px 0 0; color: #64748b; font-size: 7px; line-height: 1.45; text-align: right; }
 .gesture-indicator { min-height: 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgb(255 255 255 / 2%); }
@@ -144,8 +144,7 @@
 .gesture-meter span { display: block; height: 100%; border-radius: inherit; background: var(--gesture-color); box-shadow: 0 0 10px color-mix(in srgb,var(--gesture-color) 45%,transparent); transition: width .12s linear,background-color .2s ease; }
 .gesture-meter__label { margin-top: 6px; display: flex; justify-content: space-between; }
 .gesture-diagnostics { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
-.gesture-diagnostics summary { color: #64748b; font: 7px var(--mono); cursor: pointer; list-style-position: inside; }
-.gesture-diagnostics[open] summary { color: #94a3b8; }
+.gesture-diagnostics__title { color: #94a3b8 !important; font: 7px var(--mono) !important; }
 .gesture-debug { margin: 8px 0 0; color: var(--muted); font: 7px var(--mono); display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
 .gesture-debug div { min-width: 0; }
 .gesture-debug dt { margin-bottom: 2px; color: #64748b; }

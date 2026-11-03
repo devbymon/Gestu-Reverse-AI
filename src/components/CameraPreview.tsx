@@ -85,7 +85,7 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
           {state.status === 'no-hands' && (
             <div className="camera-hand-prompt" role="status">
               <Icon name="hand" size={16} />
-              <span><strong>Place your hand in frame</strong><small>Keep your fingers visible</small></span>
+              <span><strong>Place your hand in frame</strong><small>Keep fingers visible</small></span>
             </div>
           )}
         </div>
