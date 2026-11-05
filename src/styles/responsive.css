@@ -86,7 +86,18 @@
     outline-offset: 2px;
   }
   .gesture-map__rows { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px 6px; }
-  .gesture-map__row { min-width: 0; grid-template-columns: 24px minmax(40px,52px) 12px minmax(0,1fr); padding: 3px; }
+  .gesture-map__row {
+    min-width: 0;
+    grid-template-columns: 24px minmax(42px,56px) 18px minmax(0,1fr);
+    column-gap: 5px;
+    padding: 3px;
+  }
+  .gesture-map__row > span:nth-child(3) {
+    justify-self: center;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1;
+  }
   .gesture-map__row > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .system-camera { display: contents; }
   .camera-panel {
@@ -214,7 +225,7 @@
 
 @media (max-width: 370px) {
   .gesture-map__rows { grid-template-columns: 1fr; }
-  .gesture-map__row { grid-template-columns: 26px 62px 14px 1fr; }
+  .gesture-map__row { grid-template-columns: 26px 62px 20px minmax(0,1fr); column-gap: 6px; }
   .camera-panel.is-mobile-expanded { padding: 11px; }
   .camera-hand-prompt strong { font-size: 6.5px; }
   .camera-gate { padding-inline: 12px; }
