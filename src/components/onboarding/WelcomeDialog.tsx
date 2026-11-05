@@ -1,18 +1,23 @@
 import Icon from '../ui/Icon'
+import type { Theme } from '../../hooks/useTheme'
 import type { TrackingStatus } from '../../types/handTracking'
 
 interface WelcomeDialogProps {
   open: boolean
+  theme: Theme
   cameraStatus: TrackingStatus
   cameraError: string | null
+  onToggleTheme: () => void
   onStartCamera: () => void
   onContinueWithoutCamera: () => void
 }
 
 export default function WelcomeDialog({
   open,
+  theme,
   cameraStatus,
   cameraError,
+  onToggleTheme,
   onStartCamera,
   onContinueWithoutCamera,
 }: WelcomeDialogProps) {
@@ -22,6 +27,16 @@ export default function WelcomeDialog({
     cameraError?.toLowerCase().includes('permission')
   return (
     <div className="camera-gate" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+      <button
+        className="icon-button camera-gate__theme"
+        type="button"
+        onClick={onToggleTheme}
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+        aria-pressed={theme === 'light'}
+        title={`Use ${theme === 'dark' ? 'light' : 'dark'} theme`}
+      >
+        <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+      </button>
       <section className="camera-gate__intro">
         <span className="dialog-kicker">Gestu Reverse AI · Interactive particle system</span>
         <h1 id="welcome-title">A universe<br />waiting for <em>you.</em></h1>

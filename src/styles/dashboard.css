@@ -1,5 +1,5 @@
-.dashboard-app { min-height: 100vh; height: 100dvh; overflow: hidden; color: var(--text); background: var(--bg); display: grid; grid-template-rows: var(--header-height) minmax(0, 1fr) var(--status-height); }
-.app-header { z-index: 30; display: flex; align-items: center; gap: 18px; padding: 0 20px; border-bottom: 1px solid var(--line); background: #0a0c13; }
+.dashboard-app { min-height: 100vh; height: 100dvh; overflow: hidden; color: var(--text); background: var(--bg); display: grid; grid-template-rows: var(--header-height) minmax(0, 1fr) var(--status-height); transition: color .2s ease, background-color .2s ease; }
+.app-header { z-index: 30; display: flex; align-items: center; gap: 18px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--header-bg); }
 .sidebar-toggle { display: none; }
 .app-brand { display: flex; align-items: center; gap: 11px; min-width: 255px; }
 .app-brand > div:last-child { display: flex; flex-direction: column; }
@@ -15,7 +15,7 @@
 .header-actions { display: flex; align-items: center; gap: 7px; }
 
 .dashboard-shell { position: relative; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
-.particle-viewport { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: radial-gradient(circle at 50% 48%, rgb(33 65 125 / 15%), transparent 42%), #04060c; }
+.particle-viewport { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: radial-gradient(circle at 50% 48%, rgb(33 65 125 / 15%), transparent 42%), var(--viewport-bg); transition: background-color .2s ease; }
 .particle-viewport::after { display: none; }
 .particle-stage, .particle-canvas { position: absolute; inset: 0; }
 .particle-canvas canvas { width: 100%; height: 100%; display: block; }
@@ -37,7 +37,7 @@
 .system-camera { display: contents; }
 .system-camera.is-gated { visibility: hidden; pointer-events: none; }
 
-.gesture-map { position: absolute; z-index: 4; bottom: 28px; left: 28px; width: 245px; padding: 14px 15px; border: 1px solid var(--line); border-radius: 12px; background: rgb(8 10 17 / 88%); box-shadow: 0 16px 45px rgb(0 0 0 / 24%); }
+.gesture-map { position: absolute; z-index: 4; bottom: 28px; left: 28px; width: 245px; padding: 14px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--overlay-bg); box-shadow: 0 16px 45px var(--shadow); backdrop-filter: blur(12px); }
 .gesture-map__heading { margin-bottom: 8px; padding-bottom: 9px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
 .gesture-map__heading span { font-size: 11px; font-weight: 620; }
 .gesture-map__heading small { color: var(--muted); font: 8px var(--mono); }
@@ -221,6 +221,7 @@
 .camera-access__skip { width: 100%; margin-top: 10px; padding: 8px; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 9px; }
 
 .camera-gate { position: fixed; inset: 0; z-index: 120; overflow-y: auto; padding: calc(var(--header-height) + 35px) clamp(24px,7vw,105px) calc(var(--status-height) + 35px); background: rgb(3 5 12 / 52%); display: grid; grid-template-columns: minmax(0,1.35fr) minmax(340px,.65fr); align-items: center; gap: clamp(40px,7vw,120px); }
+.camera-gate__theme { position: fixed; z-index: 2; top: 14px; right: 16px; }
 .camera-gate__intro { max-width: 760px; text-shadow: 0 4px 28px rgb(0 0 0 / 65%); }
 .camera-gate__intro h1 { margin: 17px 0 24px; font-size: clamp(50px,6.5vw,96px); font-weight: 280; line-height: .9; letter-spacing: -.06em; }
 .camera-gate__intro h1 em { color: transparent; font-family: Georgia,serif; font-weight: 400; -webkit-text-stroke: 1px var(--violet); }
@@ -233,3 +234,71 @@
 .camera-permission-alert { margin: -7px 0 16px; padding: 11px 12px; border: 1px solid rgb(251 113 133 / 28%); border-radius: 9px; background: rgb(251 113 133 / 6%); }
 .camera-permission-alert strong { color: #fda4af; font-size: 9px; }
 .camera-permission-alert p { margin: 4px 0 0; color: #a8b3c5; font-size: 8px; line-height: 1.55; }
+
+/* Light theme keeps the particle stage slightly tinted so bright particles remain visible. */
+.dashboard-app[data-theme='light'] .particle-viewport {
+  background:
+    radial-gradient(circle at 50% 48%, rgb(14 116 144 / 13%), transparent 42%),
+    linear-gradient(rgb(255 255 255 / 25%), rgb(255 255 255 / 0%)),
+    var(--viewport-bg);
+}
+.dashboard-app[data-theme='light'] .particle-orbit { border-color: rgb(8 127 148 / 16%); }
+.dashboard-app[data-theme='light'] .particle-orbit::after { border-color: rgb(117 87 198 / 18%); }
+.dashboard-app[data-theme='light'] .mode-chip,
+.dashboard-app[data-theme='light'] .viewport-overlay strong,
+.dashboard-app[data-theme='light'] .slider-row output,
+.dashboard-app[data-theme='light'] .camera-placeholder strong,
+.dashboard-app[data-theme='light'] .tracking-status strong,
+.dashboard-app[data-theme='light'] .status-bar strong,
+.dashboard-app[data-theme='light'] .gesture-guide strong { color: #344258; }
+.dashboard-app[data-theme='light'] .gesture-map__row { color: #66748a; }
+.dashboard-app[data-theme='light'] .gesture-map__row.is-active { color: #162033; }
+
+.dashboard-app[data-theme='light'] .color-dock__toggle,
+.dashboard-app[data-theme='light'] .color-studio,
+.dashboard-app[data-theme='light'] .camera-panel {
+  background: rgb(248 250 252 / 94%);
+  box-shadow: 0 20px 55px var(--shadow);
+  color: var(--text);
+}
+.dashboard-app[data-theme='light'] .color-dock__toggle { color: #344258; }
+.dashboard-app[data-theme='light'] .color-dock__toggle:hover,
+.dashboard-app[data-theme='light'] .color-dock.is-open .color-dock__toggle,
+.dashboard-app[data-theme='light'] .color-studio__heading button,
+.dashboard-app[data-theme='light'] .camera-visibility-controls button { background: #e8eef5; color: #425169; }
+.dashboard-app[data-theme='light'] .color-presets button { background: #f1f5f9; color: #55647a; }
+.dashboard-app[data-theme='light'] .color-presets button.is-active { border-color: var(--cyan); color: var(--text); background: #e6f2f4; }
+.dashboard-app[data-theme='light'] .tracking-status,
+.dashboard-app[data-theme='light'] .gesture-indicator { background: rgb(51 65 85 / 4%); }
+.dashboard-app[data-theme='light'] .gesture-meter { background: #cbd5e1; }
+.dashboard-app[data-theme='light'] .gesture-diagnostics__title,
+.dashboard-app[data-theme='light'] .gesture-debug dd { color: #59687e !important; }
+.dashboard-app[data-theme='light'] .gesture-debug dt,
+.dashboard-app[data-theme='light'] .camera-consent { color: #6b788b; }
+.dashboard-app[data-theme='light'] .camera-button { border-color: #7aa9b1; background: #dceff2; color: #155b67; }
+.dashboard-app[data-theme='light'] .camera-button--stop { border-color: var(--line); background: transparent; color: #5f6d82; }
+
+.dashboard-app[data-theme='light'] .status-bar { background: #f3f6fa; }
+.dashboard-app[data-theme='light'] .modal-backdrop { background: rgb(30 41 59 / 38%); }
+.dashboard-app[data-theme='light'] .welcome-dialog,
+.dashboard-app[data-theme='light'] .help-panel { background: var(--panel); box-shadow: 0 24px 70px var(--shadow); }
+.dashboard-app[data-theme='light'] .help-note { background: rgb(8 127 148 / 7%); border-color: rgb(8 127 148 / 22%); }
+
+.dashboard-app[data-theme='light'] .camera-gate {
+  background: rgb(232 238 246 / 70%);
+  backdrop-filter: blur(5px);
+}
+.dashboard-app[data-theme='light'] .camera-gate__intro { text-shadow: 0 2px 24px rgb(255 255 255 / 80%); }
+.dashboard-app[data-theme='light'] .camera-gate__intro p { color: #506078; }
+.dashboard-app[data-theme='light'] .camera-gate__panel,
+.dashboard-app[data-theme='light'] .camera-access { background: rgb(255 255 255 / 94%); box-shadow: 0 25px 80px var(--shadow); }
+.dashboard-app[data-theme='light'] .camera-permission-alert strong { color: var(--danger); }
+.dashboard-app[data-theme='light'] .camera-permission-alert p { color: #59687e; }
+
+.dashboard-app[data-theme='light'] .experience-gate {
+  background: radial-gradient(circle at 25% 50%,rgb(8 127 148 / 10%),transparent 36%),#edf2f7;
+}
+.dashboard-app[data-theme='light'] .experience-intro > p { color: #59687e; }
+.dashboard-app[data-theme='light'] .experience-enter { border-color: #91a1b5; background: #ffffff; color: var(--text); }
+.dashboard-app[data-theme='light'] .experience-gate__progress { color: #718096; }
+.dashboard-app[data-theme='light'] .experience-gate__progress i { background: #b7c2d0; }

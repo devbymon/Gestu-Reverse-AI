@@ -2,6 +2,7 @@ export type IconName =
   | 'help' | 'fullscreen' | 'presentation' | 'menu' | 'close'
   | 'camera' | 'hand' | 'reset' | 'eye' | 'eyeOff'
   | 'palette'
+  | 'sun' | 'moon'
   | 'sphere' | 'galaxy' | 'heart' | 'spiral' | 'wave'
   | 'burst' | 'implosion' | 'vortex'
 
@@ -18,6 +19,8 @@ function IconPaths({ name }: { name: IconName }) {
   if (name === 'close') return <path d="m6 6 12 12M18 6 6 18" />
   if (name === 'camera') return <><rect x="3" y="6" width="18" height="13" rx="2" /><circle cx="12" cy="12.5" r="3.5" /><path d="m8 6 1.5-2h5L16 6" /></>
   if (name === 'palette') return <><path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 0-4H12a2 2 0 0 1 0-4h4a5 5 0 0 0 5-5c0-3-4-5-9-5Z" /><circle cx="7.5" cy="9" r=".7" fill="currentColor" /><circle cx="10" cy="6.5" r=".7" fill="currentColor" /><circle cx="15" cy="7" r=".7" fill="currentColor" /></>
+  if (name === 'sun') return <><circle cx="12" cy="12" r="3.5" /><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" /></>
+  if (name === 'moon') return <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />
   if (name === 'hand') return <path d="M7 12V7a1.5 1.5 0 0 1 3 0v3-5a1.5 1.5 0 0 1 3 0v5-4a1.5 1.5 0 0 1 3 0v5-2a1.5 1.5 0 0 1 3 0v5c0 4-2.5 7-7 7-3.5 0-5.5-2-7.5-5a1.5 1.5 0 0 1 2.5-1.7L9 16" />
   if (name === 'reset') return <><path d="M4 4v6h6" /><path d="M5.5 15a8 8 0 1 0 .8-7.8L4 10" /></>
   if (name === 'eye' || name === 'eyeOff') return <><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" />{name === 'eyeOff' && <path d="m4 4 16 16" />}</>

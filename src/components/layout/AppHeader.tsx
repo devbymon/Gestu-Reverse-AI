@@ -1,8 +1,11 @@
 import type { TrackingStatus } from '../../types/handTracking'
+import type { Theme } from '../../hooks/useTheme'
 import Icon from '../ui/Icon'
 
 interface AppHeaderProps {
   cameraStatus: TrackingStatus
+  theme: Theme
+  onToggleTheme: () => void
   onHelp: () => void
   onFullscreen: () => void
 }
@@ -16,6 +19,8 @@ function cameraLabel(status: TrackingStatus): string {
 
 export default function AppHeader({
   cameraStatus,
+  theme,
+  onToggleTheme,
   onHelp,
   onFullscreen,
 }: AppHeaderProps) {
@@ -32,6 +37,16 @@ export default function AppHeader({
         <span className="mode-chip">Gesture control</span>
       </div>
       <nav className="header-actions" aria-label="Application actions">
+        <button
+          className="icon-button theme-toggle"
+          type="button"
+          onClick={onToggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+          aria-pressed={theme === 'light'}
+          title={`Use ${theme === 'dark' ? 'light' : 'dark'} theme`}
+        >
+          <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+        </button>
         <button className="icon-button" type="button" onClick={onFullscreen} aria-label="Toggle fullscreen" title="Fullscreen">
           <Icon name="fullscreen" />
         </button>

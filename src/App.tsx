@@ -13,6 +13,7 @@ import { useDashboardState } from './hooks/useDashboardState'
 import { useGestureRecognition } from './hooks/useGestureRecognition'
 import { useParticleEffects } from './hooks/useParticleEffects'
 import { usePresentationMode } from './hooks/usePresentationMode'
+import { useTheme } from './hooks/useTheme'
 import type { HandTrackingState } from './types/handTracking'
 import type { ParticlePerformance } from './types/particles'
 import type { ParticleEffectCommand } from './types/particleEffects'
@@ -34,6 +35,7 @@ function App() {
   const [trackingState, setTrackingState] = useState(INITIAL_TRACKING_STATE)
   const dashboard = useDashboardState()
   const presentation = usePresentationMode()
+  const { theme, toggleTheme } = useTheme()
   const gestureRecognition = useGestureRecognition()
   const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
   const particleEffects = useParticleEffects(commandRef)
@@ -70,9 +72,11 @@ function App() {
   }, [exitPresentation, presentationMode])
 
   return (
-    <main className={`dashboard-app ${presentationMode ? 'is-presentation' : ''}`}>
+    <main className={`dashboard-app ${presentationMode ? 'is-presentation' : ''}`} data-theme={theme}>
       <AppHeader
         cameraStatus={trackingState.status}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onHelp={() => setVisible('help', true)}
         onFullscreen={() => void requestFullscreen()}
       />
@@ -108,8 +112,10 @@ function App() {
       <StatusBar performance={performance} tracking={trackingState} engineError={engineError} />
       <WelcomeDialog
         open={visibility.welcome}
+        theme={theme}
         cameraStatus={trackingState.status}
         cameraError={trackingState.error}
+        onToggleTheme={toggleTheme}
         onStartCamera={startCamera}
         onContinueWithoutCamera={exploreDemo}
       />

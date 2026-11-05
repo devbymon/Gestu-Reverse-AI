@@ -7,7 +7,7 @@
   :root { --header-height: 58px; --status-height: 31px; }
   .app-header { gap: 9px; padding: 0 10px; }
   .app-brand { min-width: 0; flex: 1; }
-  .app-brand > div:last-child > span, .brand-mark, .header-status, .header-actions > .icon-button { display: none; }
+  .app-brand > div:last-child > span, .brand-mark, .header-status, .header-actions > .icon-button:not(.theme-toggle) { display: none; }
   .app-brand strong { font-size: 13px; }
   .viewport-overlay { display: none; }
   .viewport-overlay div:nth-child(n+3) { display: none; }
