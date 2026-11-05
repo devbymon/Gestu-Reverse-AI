@@ -4,16 +4,30 @@
 }
 
 @media (max-width: 700px) {
-  :root { --header-height: 58px; --status-height: 31px; }
-  .app-header { gap: 9px; padding: 0 10px; }
+  :root { --header-height: 56px; --status-height: 27px; }
+  .dashboard-app { width: 100%; min-height: 100dvh; height: 100dvh; }
+  .app-header { gap: 9px; padding: 0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left)); }
   .app-brand { min-width: 0; flex: 1; }
   .app-brand > div:last-child > span, .brand-mark, .header-status, .header-actions > .icon-button:not(.theme-toggle) { display: none; }
-  .app-brand strong { font-size: 13px; }
+  .app-brand strong { font-size: 14px; }
+  .header-actions, .header-actions .icon-button { flex: 0 0 auto; }
+  .header-actions .icon-button { width: 42px; height: 42px; }
+  .dashboard-shell, .particle-viewport { min-height: 0; }
+  .particle-viewport {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 64px 12px max(18px,env(safe-area-inset-bottom));
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .particle-stage { position: fixed; top: var(--header-height); bottom: var(--status-height); }
   .viewport-overlay { display: none; }
-  .viewport-overlay div:nth-child(n+3) { display: none; }
   .particle-viewport::after { inset: 12px; }
-  .status-bar { gap: 14px; padding: 0 10px; overflow: hidden; }
-  .status-bar span:nth-child(4), .status-bar span:nth-child(5), .status-bar__privacy { display: none; }
+  .status-bar { gap: 12px; padding: 0 max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left)); overflow: hidden; }
+  .status-bar span:nth-child(n+3), .status-bar__privacy { display: none; }
   .welcome-dialog { padding: 35px 24px 26px; }
   .welcome-orbit { display: none; }
   .welcome-actions { flex-direction: column; }
@@ -22,11 +36,33 @@
   .hero-copy { top: 24px; left: 20px; width: calc(100% - 40px); transform: none; }
   .hero-copy h1 { margin: 8px 0; font-size: 38px; }
   .hero-copy p, .hero-index { display: none; }
-  .camera-panel { right: 12px; bottom: 12px; width: min(300px,calc(100% - 24px)); max-height: 62%; padding: 13px; }
-  .gesture-map { top: 58px; right: 12px; bottom: auto; left: 12px; width: auto; padding: 10px; }
-  .gesture-map__rows { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px 8px; }
-  .gesture-map__row { grid-template-columns: 24px 52px 13px 1fr; }
+  .gesture-map {
+    position: relative;
+    inset: auto;
+    order: 1;
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 11px;
+  }
+  .gesture-map__rows { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px 6px; }
+  .gesture-map__row { min-width: 0; grid-template-columns: 24px minmax(40px,52px) 12px minmax(0,1fr); padding: 3px; }
+  .gesture-map__row > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .system-camera { position: relative; z-index: 7; order: 2; display: block; width: 100%; flex: 0 0 auto; }
+  .camera-panel {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    padding: 14px;
+    border-radius: 15px;
+  }
+  .camera-viewport { aspect-ratio: 16 / 10; }
+  .camera-panel .gesture-indicator { padding: 10px; }
+  .gesture-indicator__result { margin: 9px 0 10px; }
+  .gesture-diagnostics { margin-top: 8px; padding-top: 7px; }
   .color-dock { top: 12px; left: 12px; }
+  .color-dock__toggle { min-width: 42px; min-height: 42px; padding: 0 11px; }
   .color-dock__toggle span { display: none; }
   .color-studio { width: min(280px,calc(100vw - 24px)); }
   .experience-gate, .experience-gate.is-camera-step { min-height: 100%; padding: 70px 24px 35px; grid-template-columns: 1fr; align-content: center; }
@@ -35,11 +71,49 @@
   .experience-intro h1 { font-size: clamp(42px,14vw,64px); }
   .experience-orbit { right: -110px; width: 220px; }
   .camera-access { justify-self: stretch; padding: 25px; }
-  .camera-gate { padding: calc(var(--header-height) + 25px) 18px calc(var(--status-height) + 25px); grid-template-columns: 1fr; align-content: center; gap: 30px; background: rgb(3 5 12 / 58%); }
-  .camera-gate__intro h1 { font-size: clamp(42px,13vw,66px); }
-  .camera-gate__intro p { font-size: 11px; }
-  .camera-gate__panel { padding: 25px; }
+  .camera-gate {
+    display: block;
+    min-height: 100dvh;
+    padding: max(28px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));
+    background: var(--viewport-bg);
+  }
+  .camera-gate__theme { position: absolute; top: max(12px,env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px; }
+  .camera-gate__intro { padding-top: 54px; text-shadow: none; }
+  .camera-gate__intro h1 { margin: 12px 0 16px; font-size: clamp(40px,12.5vw,56px); line-height: .92; }
+  .camera-gate__intro p { max-width: 34rem; font-size: 11px; line-height: 1.65; }
+  .camera-gate__panel { width: 100%; margin-top: 22px; padding: 20px; border-radius: 14px; }
+  .camera-access__icon { width: 42px; height: 42px; margin-bottom: 15px; }
+  .camera-gate__panel h2 { margin: 8px 0 12px; font-size: clamp(29px,9vw,38px); }
+  .camera-gate__panel p { margin-bottom: 18px; font-size: 10px; line-height: 1.65; }
+  .camera-gate__panel .primary-button { min-height: 48px; padding-inline: 12px; font-size: 14px; }
+  .camera-access__skip { min-height: 42px; margin-top: 4px; }
+  .dashboard-app.is-presentation .particle-viewport { padding-top: 64px; }
+  .dashboard-app.is-presentation .camera-panel { inset: auto; }
   .dashboard-app.is-presentation .camera-viewport { height: auto; }
+}
+
+@media (max-width: 370px) {
+  .particle-viewport { padding-inline: 9px; }
+  .gesture-map__rows { grid-template-columns: 1fr; }
+  .gesture-map__row { grid-template-columns: 26px 62px 14px 1fr; }
+  .camera-panel { padding: 11px; }
+  .camera-hand-prompt strong { font-size: 6.5px; }
+  .camera-gate { padding-inline: 12px; }
+  .camera-gate__intro h1 { font-size: 40px; }
+}
+
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 900px) {
+  :root { --header-height: 50px; --status-height: 0px; }
+  .dashboard-app { grid-template-rows: var(--header-height) minmax(0,1fr); }
+  .status-bar { display: none; }
+  .particle-viewport { padding: 58px 12px 16px; }
+  .particle-stage { top: var(--header-height); bottom: 0; }
+  .camera-gate { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,.85fr); gap: 24px; padding: 62px 18px 18px; }
+  .camera-gate__intro { padding-top: 0; }
+  .camera-gate__intro h1 { font-size: clamp(38px,8vw,58px); }
+  .camera-gate__intro p { display: none; }
+  .camera-gate__panel { margin-top: 0; padding: 16px; }
+  .camera-access__icon { display: none; }
 }
 
 @media (max-height: 650px) and (min-width: 701px) {
