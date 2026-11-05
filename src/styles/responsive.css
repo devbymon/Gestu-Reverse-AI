@@ -14,14 +14,9 @@
   .header-actions .icon-button { width: 42px; height: 42px; }
   .dashboard-shell, .particle-viewport { min-height: 0; }
   .particle-viewport {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding: 64px 12px max(18px,env(safe-area-inset-bottom));
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
+    display: block;
+    overflow: hidden;
+    padding: 0;
   }
   .particle-stage { position: fixed; top: var(--header-height); bottom: var(--status-height); }
   .viewport-overlay { display: none; }
@@ -37,26 +32,103 @@
   .hero-copy h1 { margin: 8px 0; font-size: 38px; }
   .hero-copy p, .hero-index { display: none; }
   .gesture-map {
-    position: relative;
-    inset: auto;
-    order: 1;
-    width: 100%;
-    flex: 0 0 auto;
+    position: absolute;
+    inset: 12px 12px auto auto;
+    z-index: 12;
+    width: min(420px,calc(100% - 24px));
     padding: 11px;
+    transition: width .2s ease, padding .2s ease, border-radius .2s ease;
+  }
+  .gesture-map__heading { align-items: center; }
+  .gesture-map__mobile-toggle {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .gesture-map.is-mobile-collapsed {
+    width: 44px;
+    padding: 0;
+    border-radius: 11px;
+  }
+  .gesture-map.is-mobile-collapsed .gesture-map__heading {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .gesture-map.is-mobile-collapsed .gesture-map__heading > span,
+  .gesture-map.is-mobile-collapsed .gesture-map__heading > small,
+  .gesture-map.is-mobile-collapsed .gesture-map__rows { display: none; }
+  .gesture-map.is-mobile-expanded .gesture-map__mobile-toggle { margin: -5px -5px -5px auto; }
+  .gesture-map.is-mobile-expanded .gesture-map__heading > small { margin-left: auto; margin-right: 7px; }
+  .gesture-map.is-mobile-expanded .gesture-map__rows { display: grid; }
+  .gesture-map__mobile-toggle:active { transform: scale(.96); }
+  .gesture-map__mobile-toggle:focus-visible,
+  .camera-panel__mobile-actions button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
   }
   .gesture-map__rows { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px 6px; }
   .gesture-map__row { min-width: 0; grid-template-columns: 24px minmax(40px,52px) 12px minmax(0,1fr); padding: 3px; }
   .gesture-map__row > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .system-camera { position: relative; z-index: 7; order: 2; display: block; width: 100%; flex: 0 0 auto; }
+  .system-camera { display: contents; }
   .camera-panel {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    max-height: none;
-    overflow: visible;
+    position: fixed;
+    inset: auto 12px calc(var(--status-height) + max(12px,env(safe-area-inset-bottom))) auto;
+    z-index: 22;
+    width: min(420px,calc(100% - 24px));
+    max-height: calc(100dvh - var(--header-height) - var(--status-height) - 24px);
+    overflow-y: auto;
     padding: 14px;
     border-radius: 15px;
+    transition: width .22s ease, padding .22s ease, border-radius .22s ease;
   }
+  .camera-panel__mobile-actions { margin-left: auto; display: flex; gap: 5px; }
+  .camera-panel__mobile-actions button {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--control-bg);
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .camera-panel.is-mobile-collapsed {
+    width: min(172px,45vw);
+    padding: 7px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .camera-panel.is-mobile-collapsed .section-heading { margin: 0 0 6px; }
+  .camera-panel.is-mobile-collapsed .section-heading > div:first-child,
+  .camera-panel.is-mobile-collapsed .privacy-chip,
+  .camera-panel.is-mobile-collapsed .camera-panel__details,
+  .camera-panel.is-mobile-collapsed .camera-hand-prompt { display: none; }
+  .camera-panel.is-mobile-collapsed .camera-panel__mobile-actions { width: 100%; justify-content: flex-end; }
+  .camera-panel.is-mobile-collapsed .camera-panel__mobile-actions button { width: 32px; height: 30px; }
+  .camera-panel.is-mobile-collapsed .camera-viewport { aspect-ratio: 4 / 3; border-radius: 8px; }
+  .camera-panel.is-mobile-collapsed .camera-placeholder { gap: 3px; }
+  .camera-panel.is-mobile-collapsed .camera-placeholder .camera-reticle,
+  .camera-panel.is-mobile-collapsed .camera-placeholder > span:last-child { display: none; }
+  .camera-panel.is-mobile-collapsed .camera-placeholder strong { padding: 0 8px; font-size: 8px; }
+  .camera-panel.is-mobile-collapsed .camera-live-badge { top: 5px; left: 5px; }
+  .camera-panel.is-mobile-expanded .section-heading { align-items: center; }
+  .camera-panel.is-mobile-expanded .privacy-chip { margin-left: auto; }
+  .camera-panel.is-mobile-expanded .camera-panel__mobile-actions { margin-left: 7px; }
+  .camera-panel.is-mobile-expanded .camera-panel__details { display: block; }
+  .camera-panel.is-mobile-expanded .camera-viewport { aspect-ratio: 16 / 10; }
+  .camera-panel__mobile-actions button + button { color: var(--danger); }
+  .camera-panel__mobile-actions button:active { transform: scale(.95); }
+  .camera-panel__details { display: block; }
   .camera-viewport { aspect-ratio: 16 / 10; }
   .camera-panel .gesture-indicator { padding: 10px; }
   .gesture-indicator__result { margin: 9px 0 10px; }
@@ -87,16 +159,15 @@
   .camera-gate__panel p { margin-bottom: 18px; font-size: 10px; line-height: 1.65; }
   .camera-gate__panel .primary-button { min-height: 48px; padding-inline: 12px; font-size: 14px; }
   .camera-access__skip { min-height: 42px; margin-top: 4px; }
-  .dashboard-app.is-presentation .particle-viewport { padding-top: 64px; }
-  .dashboard-app.is-presentation .camera-panel { inset: auto; }
+  .dashboard-app.is-presentation .particle-viewport { padding: 0; }
+  .dashboard-app.is-presentation .camera-panel { inset: auto 12px max(12px,env(safe-area-inset-bottom)) auto; }
   .dashboard-app.is-presentation .camera-viewport { height: auto; }
 }
 
 @media (max-width: 370px) {
-  .particle-viewport { padding-inline: 9px; }
   .gesture-map__rows { grid-template-columns: 1fr; }
   .gesture-map__row { grid-template-columns: 26px 62px 14px 1fr; }
-  .camera-panel { padding: 11px; }
+  .camera-panel.is-mobile-expanded { padding: 11px; }
   .camera-hand-prompt strong { font-size: 6.5px; }
   .camera-gate { padding-inline: 12px; }
   .camera-gate__intro h1 { font-size: 40px; }
@@ -106,7 +177,7 @@
   :root { --header-height: 50px; --status-height: 0px; }
   .dashboard-app { grid-template-rows: var(--header-height) minmax(0,1fr); }
   .status-bar { display: none; }
-  .particle-viewport { padding: 58px 12px 16px; }
+  .particle-viewport { padding: 0; }
   .particle-stage { top: var(--header-height); bottom: 0; }
   .camera-gate { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,.85fr); gap: 24px; padding: 62px 18px 18px; }
   .camera-gate__intro { padding-top: 0; }

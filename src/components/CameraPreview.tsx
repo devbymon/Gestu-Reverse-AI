@@ -3,6 +3,7 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from 'react'
 import { useHandTracking } from '../hooks/useHandTracking'
 import HandLandmarkOverlay, {
@@ -33,6 +34,7 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
     onTrackingReset,
     onStateChange,
   }, forwardedRef) {
+    const [mobileExpanded, setMobileExpanded] = useState(false)
     const videoRef = useRef<HTMLVideoElement>(null)
     const overlayRef = useRef<HandLandmarkOverlayHandle>(null)
     const { state, enableCamera, disableCamera } = useHandTracking(
@@ -48,10 +50,25 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
     useEffect(() => onStateChange(state), [onStateChange, state])
 
     return (
-      <aside className="camera-panel" aria-labelledby="camera-title">
+      <aside className={`camera-panel ${mobileExpanded ? 'is-mobile-expanded' : 'is-mobile-collapsed'}`} aria-labelledby="camera-title">
         <div className="section-heading">
           <div><span>01</span><h2 id="camera-title">AI Hand Tracking</h2></div>
           <span className="privacy-chip">Local only</span>
+          <div className="camera-panel__mobile-actions">
+            <button
+              type="button"
+              aria-label={mobileExpanded ? 'Minimize camera panel' : 'Expand camera panel'}
+              aria-expanded={mobileExpanded}
+              onClick={() => setMobileExpanded((expanded) => !expanded)}
+            >
+              <Icon name={mobileExpanded ? 'eyeOff' : 'eye'} size={16} />
+            </button>
+            {isRunning && (
+              <button type="button" aria-label="Turn off camera" onClick={disableCamera}>
+                <Icon name="close" size={16} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div
@@ -90,20 +107,22 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
           )}
         </div>
 
-        <HandTrackingStatus state={state} />
-        <GestureIndicator state={gestureState} />
-        <button
-          className={`camera-button ${isRunning ? 'camera-button--stop' : ''}`}
-          type="button"
-          disabled={isTransitioning}
-          onClick={isRunning ? disableCamera : () => void enableCamera()}
-        >
-          <Icon name="camera" size={15} />
-          {isTransitioning ? 'Starting camera…' : isRunning ? 'Turn off camera' : 'Enable Camera'}
-        </button>
-        <p className="camera-consent">
-          Processed on this device · Never recorded
-        </p>
+        <div className="camera-panel__details">
+          <HandTrackingStatus state={state} />
+          <GestureIndicator state={gestureState} />
+          <button
+            className={`camera-button ${isRunning ? 'camera-button--stop' : ''}`}
+            type="button"
+            disabled={isTransitioning}
+            onClick={isRunning ? disableCamera : () => void enableCamera()}
+          >
+            <Icon name="camera" size={15} />
+            {isTransitioning ? 'Starting camera…' : isRunning ? 'Turn off camera' : 'Enable Camera'}
+          </button>
+          <p className="camera-consent">
+            Processed on this device · Never recorded
+          </p>
+        </div>
       </aside>
     )
   },
