@@ -145,16 +145,34 @@
   .experience-orbit { right: -110px; width: 220px; }
   .camera-access { justify-self: stretch; padding: 25px; }
   .camera-gate {
-    display: block;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-content: space-between;
+    gap: clamp(64px,14vh,140px);
     min-height: 100dvh;
-    padding: max(28px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));
-    background: var(--viewport-bg);
+    padding: max(16px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb,var(--viewport-bg) 94%,transparent) 0%,
+      color-mix(in srgb,var(--viewport-bg) 72%,transparent) 25%,
+      color-mix(in srgb,var(--viewport-bg) 18%,transparent) 52%,
+      color-mix(in srgb,var(--viewport-bg) 76%,transparent) 78%,
+      color-mix(in srgb,var(--viewport-bg) 92%,transparent) 100%
+    );
   }
   .camera-gate__theme { position: absolute; top: max(12px,env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px; }
-  .camera-gate__intro { padding-top: 54px; text-shadow: none; }
-  .camera-gate__intro h1 { margin: 12px 0 16px; font-size: clamp(40px,12.5vw,56px); line-height: .92; }
+  .camera-gate__intro { padding-top: 18px; padding-right: 54px; text-shadow: 0 2px 18px var(--viewport-bg); }
+  .camera-gate__intro h1 { margin: 8px 0 13px; font-size: clamp(40px,12.5vw,56px); line-height: .92; }
   .camera-gate__intro p { max-width: 34rem; font-size: 11px; line-height: 1.65; }
-  .camera-gate__panel { width: 100%; margin-top: 22px; padding: 20px; border-radius: 14px; }
+  .camera-gate__panel {
+    width: 100%;
+    margin-top: 0;
+    padding: 20px;
+    border-radius: 14px;
+    background: color-mix(in srgb,var(--panel) 86%,transparent);
+    backdrop-filter: blur(14px);
+  }
   .camera-access__icon { width: 42px; height: 42px; margin-bottom: 15px; }
   .camera-gate__panel h2 { margin: 8px 0 12px; font-size: clamp(29px,9vw,38px); }
   .camera-gate__panel p { margin-bottom: 18px; font-size: 10px; line-height: 1.65; }
