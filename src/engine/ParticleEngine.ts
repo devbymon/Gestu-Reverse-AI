@@ -25,7 +25,6 @@ import { getParticlePalette } from './ColorPalettes'
 import type { Theme } from '../hooks/useTheme'
 
 const INITIAL_PARTICLE_COUNT = 10_000
-const BALANCED_PARTICLE_COUNT = 7_500
 const LOW_FPS_THRESHOLD = 42
 const LOW_FPS_SAMPLE_LIMIT = 4
 
@@ -441,7 +440,6 @@ export class ParticleEngine {
     if (this.lowFpsSamples >= LOW_FPS_SAMPLE_LIMIT && this.quality === 'high') {
       this.quality = 'balanced'
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25))
-      this.createParticles(BALANCED_PARTICLE_COUNT)
       this.resize()
     }
     this.onPerformance?.({ fps, particleCount: this.particleCount, quality: this.quality })
