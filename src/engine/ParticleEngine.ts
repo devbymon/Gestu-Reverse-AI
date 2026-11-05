@@ -34,11 +34,12 @@ const vertexShader = `
   attribute vec3 aColor;
   varying vec3 vColor;
   uniform float uEnergy;
+  uniform float uLightMode;
 
   void main() {
     vColor = aColor;
     vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = aSize * (1.0 + uEnergy * 0.3) * (150.0 / -viewPosition.z);
+    gl_PointSize = aSize * (1.0 + uEnergy * 0.3) * (1.0 + uLightMode * 0.28) * (150.0 / -viewPosition.z);
     gl_Position = projectionMatrix * viewPosition;
   }
 `
@@ -46,14 +47,21 @@ const vertexShader = `
 const fragmentShader = `
   varying vec3 vColor;
   uniform float uEnergy;
+  uniform float uLightMode;
 
   void main() {
     float distanceToCenter = length(gl_PointCoord - vec2(0.5));
     if (distanceToCenter > 0.5) discard;
     float core = 1.0 - smoothstep(0.0, 0.16, distanceToCenter);
     float halo = 1.0 - smoothstep(0.08, 0.5, distanceToCenter);
-    float alpha = core * 0.9 + halo * (0.28 + uEnergy * 0.12);
-    gl_FragColor = vec4(vColor * (1.0 + core * (1.8 + uEnergy)), alpha);
+    float darkAlpha = core * 0.9 + halo * (0.28 + uEnergy * 0.12);
+    vec3 darkColor = vColor * (1.0 + core * (1.8 + uEnergy));
+    float lightAlpha = core * 0.98 + halo * (0.5 + uEnergy * 0.08);
+    vec3 lightColor = vColor * (0.58 + core * 0.34);
+    gl_FragColor = vec4(
+      mix(darkColor, lightColor, uLightMode),
+      mix(darkAlpha, lightAlpha, uLightMode)
+    );
   }
 `
 
@@ -69,7 +77,7 @@ export class ParticleEngine {
   private readonly getTheme?: () => Theme
   private readonly formations = new FormationRegistry()
   private readonly transition = new FormationTransition()
-  private readonly uniforms = { uEnergy: { value: 0 } }
+  private readonly uniforms = { uEnergy: { value: 0 }, uLightMode: { value: 0 } }
   private points: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null = null
   private velocities: Float32Array<ArrayBufferLike> = new Float32Array()
   private targets: Float32Array<ArrayBufferLike> = new Float32Array()
@@ -104,6 +112,7 @@ export class ParticleEngine {
     this.getSettings = getSettings
     this.getTheme = getTheme
     this.theme = getTheme?.() ?? 'dark'
+    this.uniforms.uLightMode.value = this.theme === 'light' ? 1 : 0
     this.renderer = new THREE.WebGLRenderer({
       antialias: false,
       alpha: true,
@@ -177,7 +186,7 @@ export class ParticleEngine {
       fragmentShader,
       uniforms: this.uniforms,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: this.theme === 'light' ? THREE.NormalBlending : THREE.AdditiveBlending,
       depthWrite: false,
     })
     this.points = new THREE.Points(geometry, material)
@@ -387,6 +396,13 @@ export class ParticleEngine {
     const nextTheme = this.getTheme?.() ?? 'dark'
     if (nextTheme === this.theme) return
     this.theme = nextTheme
+    this.uniforms.uLightMode.value = this.theme === 'light' ? 1 : 0
+    if (this.points) {
+      this.points.material.blending = this.theme === 'light'
+        ? THREE.NormalBlending
+        : THREE.AdditiveBlending
+      this.points.material.needsUpdate = true
+    }
     this.updateParticleStyle()
   }
 
