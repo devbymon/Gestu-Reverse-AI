@@ -63,11 +63,6 @@ const CameraPreview = forwardRef<CameraPanelHandle, CameraPreviewProps>(
             >
               <Icon name={mobileExpanded ? 'eyeOff' : 'eye'} size={16} />
             </button>
-            {isRunning && (
-              <button type="button" aria-label="Turn off camera" onClick={disableCamera}>
-                <Icon name="close" size={16} />
-              </button>
-            )}
           </div>
         </div>
 

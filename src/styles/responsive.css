@@ -137,7 +137,6 @@
   .camera-panel.is-mobile-expanded .camera-panel__mobile-actions { margin-left: 7px; }
   .camera-panel.is-mobile-expanded .camera-panel__details { display: block; }
   .camera-panel.is-mobile-expanded .camera-viewport { aspect-ratio: 16 / 10; }
-  .camera-panel__mobile-actions button + button { color: var(--danger); }
   .camera-panel__mobile-actions button:active { transform: scale(.95); }
   .camera-panel__details { display: block; }
   .camera-viewport { aspect-ratio: 16 / 10; }
