@@ -79,7 +79,10 @@ function App() {
   }, [exitPresentation, presentationMode])
 
   return (
-    <main className={`dashboard-app ${presentationMode ? 'is-presentation' : ''}`} data-theme={theme}>
+    <main
+      className={`dashboard-app ${presentationMode ? 'is-presentation' : ''} ${visibility.welcome ? 'is-welcome' : ''}`}
+      data-theme={theme}
+    >
       <AppHeader
         cameraStatus={trackingState.status}
         theme={theme}

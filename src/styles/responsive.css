@@ -12,6 +12,7 @@
   .app-brand strong { font-size: 14px; }
   .header-actions, .header-actions .icon-button { flex: 0 0 auto; }
   .header-actions .icon-button { width: 42px; height: 42px; }
+  .dashboard-app.is-welcome .app-header .header-actions { visibility: hidden; }
   .dashboard-shell, .particle-viewport { min-height: 0; }
   .particle-viewport {
     display: block;
@@ -161,8 +162,16 @@
       color-mix(in srgb,var(--viewport-bg) 92%,transparent) 100%
     );
   }
-  .camera-gate__theme { position: absolute; top: max(12px,env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px; }
-  .camera-gate__intro { padding-top: 18px; padding-right: 54px; text-shadow: 0 2px 18px var(--viewport-bg); }
+  .camera-gate__theme {
+    position: absolute;
+    top: max(12px,env(safe-area-inset-top));
+    right: 14px;
+    width: 44px;
+    height: 44px;
+    box-shadow: none;
+  }
+  .camera-gate__intro { padding-top: 46px; padding-right: 54px; text-shadow: 0 2px 18px var(--viewport-bg); }
+  .camera-gate__intro > .dialog-kicker { display: none; }
   .camera-gate__intro h1 { margin: 8px 0 13px; font-size: clamp(40px,12.5vw,56px); line-height: .92; }
   .camera-gate__intro p { max-width: 34rem; font-size: 11px; line-height: 1.65; }
   .camera-gate__panel {
