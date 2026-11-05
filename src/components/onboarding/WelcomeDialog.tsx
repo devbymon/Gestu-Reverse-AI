@@ -45,7 +45,7 @@ export default function WelcomeDialog({
       <section className="camera-gate__panel">
         <span className="camera-access__icon"><Icon name="camera" size={22} /></span>
         <span className="dialog-kicker">Gestu Reverse AI · Camera access</span>
-        <h2>Bring the universe<br />to your hands.</h2>
+        <h2>Bring the universe to your hands.</h2>
         <p>Enable your camera to track up to two hands. Frames stay on this device and are never recorded or uploaded.</p>
         {cameraStatus === 'error' && (
           <div className="camera-permission-alert" role="alert">
