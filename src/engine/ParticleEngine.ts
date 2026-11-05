@@ -23,6 +23,11 @@ import { normalizedHandToWorld } from '../utils/coordinateMapping'
 import { clamp01 } from '../utils/easing'
 import { getParticlePalette } from './ColorPalettes'
 import type { Theme } from '../hooks/useTheme'
+import {
+  getResponsiveCameraDistance,
+  getResponsivePixelRatio,
+  getResponsivePointScale,
+} from './ResponsiveViewport'
 
 const INITIAL_PARTICLE_COUNT = 10_000
 const LOW_FPS_THRESHOLD = 42
@@ -34,11 +39,12 @@ const vertexShader = `
   varying vec3 vColor;
   uniform float uEnergy;
   uniform float uLightMode;
+  uniform float uPointScale;
 
   void main() {
     vColor = aColor;
     vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = aSize * (1.0 + uEnergy * 0.3) * (1.0 + uLightMode * 0.28) * (150.0 / -viewPosition.z);
+    gl_PointSize = aSize * uPointScale * (1.0 + uEnergy * 0.3) * (1.0 + uLightMode * 0.28) * (150.0 / -viewPosition.z);
     gl_Position = projectionMatrix * viewPosition;
   }
 `
@@ -76,7 +82,11 @@ export class ParticleEngine {
   private readonly getTheme?: () => Theme
   private readonly formations = new FormationRegistry()
   private readonly transition = new FormationTransition()
-  private readonly uniforms = { uEnergy: { value: 0 }, uLightMode: { value: 0 } }
+  private readonly uniforms = {
+    uEnergy: { value: 0 },
+    uLightMode: { value: 0 },
+    uPointScale: { value: 1 },
+  }
   private points: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null = null
   private velocities: Float32Array<ArrayBufferLike> = new Float32Array()
   private targets: Float32Array<ArrayBufferLike> = new Float32Array()
@@ -118,7 +128,6 @@ export class ParticleEngine {
       powerPreference: 'high-performance',
     })
     this.renderer.setClearColor(0x050510, 0)
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
     this.renderer.domElement.setAttribute('aria-label', 'Interactive 3D particle formations')
     this.renderer.domElement.setAttribute('role', 'img')
     this.renderer.domElement.addEventListener('webglcontextlost', this.handleContextLost)
@@ -145,7 +154,14 @@ export class ParticleEngine {
     const width = Math.max(this.container.clientWidth, 1)
     const height = Math.max(this.container.clientHeight, 1)
     this.camera.aspect = width / height
+    this.camera.position.z = getResponsiveCameraDistance(this.camera.aspect)
+    this.uniforms.uPointScale.value = getResponsivePointScale(this.camera.aspect)
     this.camera.updateProjectionMatrix()
+    this.renderer.setPixelRatio(getResponsivePixelRatio(
+      window.devicePixelRatio,
+      width,
+      this.quality === 'balanced',
+    ))
     this.renderer.setSize(width, height, false)
   }
 
@@ -439,7 +455,6 @@ export class ParticleEngine {
       : Math.max(0, this.lowFpsSamples - 1)
     if (this.lowFpsSamples >= LOW_FPS_SAMPLE_LIMIT && this.quality === 'high') {
       this.quality = 'balanced'
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25))
       this.resize()
     }
     this.onPerformance?.({ fps, particleCount: this.particleCount, quality: this.quality })

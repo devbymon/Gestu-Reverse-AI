@@ -11,6 +11,12 @@ import {
 import type { FormationContext, FormationType } from '../types/particleEffects'
 import { normalizedHandToWorld } from '../utils/coordinateMapping'
 import { easeInOutCubic, smoothstep } from '../utils/easing'
+import {
+  BASE_CAMERA_DISTANCE,
+  getResponsiveCameraDistance,
+  getResponsivePixelRatio,
+  getResponsivePointScale,
+} from './ResponsiveViewport'
 
 const FORMATIONS: FormationType[] = [
   'WORLD',
@@ -122,5 +128,19 @@ describe('particle forces and mapping', () => {
   it('clamps normalized hand coordinates to the visible world area', () => {
     expect(normalizedHandToWorld({ x: 8, y: -8 }, 3)).toEqual({ x: 2.8, y: -2 })
     expect(normalizedHandToWorld(undefined, 1)).toEqual({ x: 0, y: 0 })
+  })
+
+  it('preserves the full formation width on portrait viewports', () => {
+    expect(getResponsiveCameraDistance(1)).toBe(BASE_CAMERA_DISTANCE)
+    expect(getResponsiveCameraDistance(0.5)).toBe(BASE_CAMERA_DISTANCE * 2)
+    expect(getResponsiveCameraDistance(2)).toBe(BASE_CAMERA_DISTANCE)
+    expect(getResponsivePointScale(0.5)).toBeCloseTo(Math.SQRT2)
+    expect(normalizedHandToWorld({ x: 1, y: 0 }, 0.5).x).toBeCloseTo(2.2)
+  })
+
+  it('caps pixel density more aggressively on mobile and balanced quality', () => {
+    expect(getResponsivePixelRatio(3, 390, false)).toBe(1.5)
+    expect(getResponsivePixelRatio(3, 1200, false)).toBe(1.75)
+    expect(getResponsivePixelRatio(3, 390, true)).toBe(1.25)
   })
 })

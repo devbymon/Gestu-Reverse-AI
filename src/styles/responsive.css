@@ -19,6 +19,7 @@
     padding: 0;
   }
   .particle-stage { position: fixed; top: var(--header-height); bottom: var(--status-height); }
+  .particle-orbit { width: min(78vw,52vh); }
   .viewport-overlay { display: none; }
   .particle-viewport::after { inset: 12px; }
   .status-bar { gap: 12px; padding: 0 max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left)); overflow: hidden; }
