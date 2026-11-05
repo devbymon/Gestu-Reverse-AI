@@ -22,6 +22,7 @@ import { DEFAULT_EFFECT_COMMAND } from '../types/particleEffects'
 import { normalizedHandToWorld } from '../utils/coordinateMapping'
 import { clamp01 } from '../utils/easing'
 import { getParticlePalette } from './ColorPalettes'
+import type { Theme } from '../hooks/useTheme'
 
 const INITIAL_PARTICLE_COUNT = 10_000
 const BALANCED_PARTICLE_COUNT = 7_500
@@ -65,6 +66,7 @@ export class ParticleEngine {
   private readonly onPerformance?: (performance: ParticlePerformance) => void
   private readonly getEffectCommand?: () => ParticleEffectCommand
   private readonly getSettings?: () => ParticleSettings
+  private readonly getTheme?: () => Theme
   private readonly formations = new FormationRegistry()
   private readonly transition = new FormationTransition()
   private readonly uniforms = { uEnergy: { value: 0 } }
@@ -87,17 +89,21 @@ export class ParticleEngine {
   private lastSettingsRevision = Number.NEGATIVE_INFINITY
   private contextLost = false
   private quality: ParticlePerformance['quality'] = 'high'
+  private theme: Theme = 'dark'
 
   constructor(
     container: HTMLElement,
     onPerformance?: (performance: ParticlePerformance) => void,
     getEffectCommand?: () => ParticleEffectCommand,
     getSettings?: () => ParticleSettings,
+    getTheme?: () => Theme,
   ) {
     this.container = container
     this.onPerformance = onPerformance
     this.getEffectCommand = getEffectCommand
     this.getSettings = getSettings
+    this.getTheme = getTheme
+    this.theme = getTheme?.() ?? 'dark'
     this.renderer = new THREE.WebGLRenderer({
       antialias: false,
       alpha: true,
@@ -190,6 +196,7 @@ export class ParticleEngine {
   private animate = (): void => {
     this.animationFrame = requestAnimationFrame(this.animate)
     const delta = Math.min(this.clock.getDelta(), 0.05)
+    this.consumeTheme()
     this.consumeSettings()
     const simulationDelta = delta * this.settings.animationSpeed
     this.simulationTime += simulationDelta
@@ -356,7 +363,7 @@ export class ParticleEngine {
     const sizeArray = sizeAttribute.array as Float32Array
     for (let index = 0; index < this.particleCount; index += 1) {
       const offset = index * 3
-      if (this.currentCommand.effect === 'WORLD') {
+      if (this.currentCommand.effect === 'WORLD' && this.theme === 'dark') {
         const colorMix = ((index * 37) % 101) / 100
         mixed.copy(colors[0]).lerp(colors[1] ?? colors[0], colorMix)
       } else {
@@ -374,6 +381,13 @@ export class ParticleEngine {
     }
     colorAttribute.needsUpdate = true
     sizeAttribute.needsUpdate = true
+  }
+
+  private consumeTheme(): void {
+    const nextTheme = this.getTheme?.() ?? 'dark'
+    if (nextTheme === this.theme) return
+    this.theme = nextTheme
+    this.updateParticleStyle()
   }
 
   private consumeSettings(): void {

@@ -3,10 +3,12 @@ import { ParticleEngine } from '../engine/ParticleEngine'
 import type { ParticlePerformance } from '../types/particles'
 import type { ParticleSettings } from '../types/particles'
 import type { ParticleEffectCommand } from '../types/particleEffects'
+import type { Theme } from '../hooks/useTheme'
 
 interface ParticleSceneProps {
   getEffectCommand: () => ParticleEffectCommand
   getSettings: () => ParticleSettings
+  getTheme: () => Theme
   onPerformance: (performance: ParticlePerformance) => void
   onEngineError: (message: string | null) => void
 }
@@ -14,6 +16,7 @@ interface ParticleSceneProps {
 export default function ParticleScene({
   getEffectCommand,
   getSettings,
+  getTheme,
   onPerformance,
   onEngineError,
 }: ParticleSceneProps) {
@@ -26,7 +29,7 @@ export default function ParticleScene({
 
     let engine: ParticleEngine
     try {
-      engine = new ParticleEngine(container, onPerformance, getEffectCommand, getSettings)
+      engine = new ParticleEngine(container, onPerformance, getEffectCommand, getSettings, getTheme)
     } catch {
       const errorTimer = window.setTimeout(() => {
         setEngineError('WebGL is unavailable. Camera tracking and appearance settings remain accessible.')
@@ -50,7 +53,7 @@ export default function ParticleScene({
       document.removeEventListener('visibilitychange', handleVisibility)
       engine.dispose()
     }
-  }, [getEffectCommand, getSettings, onEngineError, onPerformance])
+  }, [getEffectCommand, getSettings, getTheme, onEngineError, onPerformance])
 
   return (
     <div className="particle-stage">

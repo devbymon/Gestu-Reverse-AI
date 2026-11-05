@@ -14,6 +14,7 @@ import { useGestureRecognition } from './hooks/useGestureRecognition'
 import { useParticleEffects } from './hooks/useParticleEffects'
 import { usePresentationMode } from './hooks/usePresentationMode'
 import { useTheme } from './hooks/useTheme'
+import type { Theme } from './hooks/useTheme'
 import type { HandTrackingState } from './types/handTracking'
 import type { ParticlePerformance } from './types/particles'
 import type { ParticleEffectCommand } from './types/particleEffects'
@@ -36,6 +37,7 @@ function App() {
   const dashboard = useDashboardState()
   const presentation = usePresentationMode()
   const { theme, toggleTheme } = useTheme()
+  const themeRef = useRef<Theme>(theme)
   const gestureRecognition = useGestureRecognition()
   const { state: gestureState, commandRef, processFrame, reset: resetGestures } = gestureRecognition
   const particleEffects = useParticleEffects(commandRef)
@@ -48,6 +50,11 @@ function App() {
   const getSceneEffectCommand = useCallback(() => (
     visibility.welcome ? CAMERA_PREVIEW_EFFECT : getEffectCommand()
   ), [getEffectCommand, visibility.welcome])
+  const getTheme = useCallback(() => themeRef.current, [])
+
+  useEffect(() => {
+    themeRef.current = theme
+  }, [theme])
 
   const handlePerformance = useCallback((metrics: ParticlePerformance) => setPerformance(metrics), [])
   const handleEngineError = useCallback((message: string | null) => setEngineError(message), [])
@@ -83,7 +90,7 @@ function App() {
       <div className="dashboard-shell">
         <section className="particle-viewport" aria-label="Interactive particle viewport">
           <ParticleScene
-            getEffectCommand={getSceneEffectCommand} getSettings={getSettings}
+            getEffectCommand={getSceneEffectCommand} getSettings={getSettings} getTheme={getTheme}
             onPerformance={handlePerformance} onEngineError={handleEngineError}
           />
           {!visibility.welcome && <GestureGuide state={gestureState} />}
