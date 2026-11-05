@@ -155,7 +155,9 @@
     padding: max(16px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
     background: linear-gradient(
       180deg,
-      color-mix(in srgb,var(--viewport-bg) 94%,transparent) 0%,
+      transparent 0,
+      transparent var(--header-height),
+      color-mix(in srgb,var(--viewport-bg) 94%,transparent) var(--header-height),
       color-mix(in srgb,var(--viewport-bg) 72%,transparent) 25%,
       color-mix(in srgb,var(--viewport-bg) 18%,transparent) 52%,
       color-mix(in srgb,var(--viewport-bg) 76%,transparent) 78%,
@@ -170,7 +172,7 @@
     height: 44px;
     box-shadow: none;
   }
-  .camera-gate__intro { padding-top: 46px; padding-right: 54px; text-shadow: 0 2px 18px var(--viewport-bg); }
+  .camera-gate__intro { padding-top: calc(var(--header-height) + 12px); padding-right: 54px; text-shadow: 0 2px 18px var(--viewport-bg); }
   .camera-gate__intro > .dialog-kicker { display: none; }
   .camera-gate__intro h1 { margin: 8px 0 13px; font-size: clamp(40px,12.5vw,56px); line-height: .92; }
   .camera-gate__intro p { max-width: 34rem; font-size: 11px; line-height: 1.65; }
