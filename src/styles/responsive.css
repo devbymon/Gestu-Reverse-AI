@@ -21,6 +21,15 @@
   }
   .particle-stage { position: fixed; top: var(--header-height); bottom: var(--status-height); }
   .particle-orbit { width: min(78vw,52vh); }
+  .particle-canvas canvas { transition: transform .38s cubic-bezier(.22,1,.36,1); }
+  .dashboard-app.is-welcome .particle-canvas canvas {
+    transform: translateY(-3vh) scale(.82);
+    transform-origin: 50% 50%;
+  }
+  .dashboard-app.is-welcome .particle-orbit {
+    top: 47%;
+    width: min(64vw,44vh);
+  }
   .viewport-overlay { display: none; }
   .particle-viewport::after { inset: 12px; }
   .status-bar { gap: 12px; padding: 0 max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left)); overflow: hidden; }
